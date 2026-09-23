@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PP BOARD - Modern Production Dashboard</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0284c7',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+    /* Pulse glow effect for IN_PROGRESS */
+    .glow-progress {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+
+  <!-- Top Navigation & Header -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Main Centered Logo Display -->
+      <div class="py-4 flex flex-col items-center justify-center border-b border-slate-800/80">
+        <div class="bg-white px-8 py-3 rounded-2xl shadow-lg border border-slate-200 flex items-center justify-center transition-transform hover:scale-105">
+          <img src="https://www.alliedmfg.co.th/wp-content/uploads/2026/07/AMS-LOGO-V1.png" 
+               alt="AMS Logo" 
+               class="h-16 sm:h-20 w-auto object-contain"
+               onerror="this.onerror=null; this.src='https://placehold.co/300x80/ffffff/0284c7?text=AMS+LOGISTICS';">
+        </div>
+        <div class="text-center mt-3">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500">PP BOARD</span>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30">PRODUCTION SYSTEM</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">ระบบบันทึกติดตามการทำงาน Production Real-time (GMT+7)</p>
+        </div>
+      </div>
+
+      <!-- Action Bar & Time Info -->
+      <div class="py-3 flex flex-wrap items-center justify-between gap-4">
+        <!-- Thai Clock & Status -->
+        <div class="flex items-center gap-4 text-xs sm:text-sm">
+          <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2">
+            <i class="fa-regular fa-clock text-sky-400"></i>
+            <span id="thaiClock" class="font-mono font-medium text-slate-200">--:--:--</span>
+            <span class="text-slate-500 text-xs">GMT+7</span>
+          </div>
+          <div id="syncStatus" class="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>เชื่อมต่อสำเร็จ</span>
+          </div>
+        </div>
+
+        <!-- Right Quick Controls -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button onclick="openAddWorkModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-4 py-2 rounded-xl shadow-lg shadow-emerald-900/30 transition flex items-center gap-2 active:scale-95 text-sm sm:text-base">
+            <i class="fa-solid fa-plus text-base"></i>
+            <span>+ เพิ่มงาน</span>
+          </button>
+          
+          <button onclick="fetchWorkLogs()" title="รีเฟรชข้อมูล" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl border border-slate-700 transition">
+            <i id="refreshIcon" class="fa-solid fa-rotate"></i>
+          </button>
+
+          <button onclick="openGasCodeModal()" title="ดู Code Google Apps Script" class="bg-slate-800 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5 text-xs font-medium">
+            <i class="fa-solid fa-code"></i>
+            <span class="hidden sm:inline">GAS Backend</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Production Overview Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+        <div>
+          <p class="text-xs font-medium text-slate-400">งานกำลังดำเนินการ</p>
+          <h3 id="statInProgress" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+        <div>
+          <p class="text-xs font-medium text-slate-400">เสร็จสิ้นแล้ว (รอบ)</p>
+          <h3 id="statCompleted" class="text-2xl font-bold text-sky-400 mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+        <div>
+          <p class="text-xs font-medium text-slate-400">กลุ่มงานทั้งหมด</p>
+          <h3 id="statTotalGroups" class="text-2xl font-bold text-amber-400 mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+        <div>
+          <p class="text-xs font-medium text-slate-400">พนักงานที่ปฏิบัติงาน</p>
+          <h3 id="statActiveEmps" class="text-2xl font-bold text-purple-400 mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+          <i class="fa-solid fa-id-badge"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-xl space-y-3">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <span class="flex items-center gap-2"><i class="fa-solid fa-filter text-sky-400"></i> ตัวกรองข้อมูล (Dashboard Filters)</span>
+        <button onclick="resetFilters()" class="text-sky-400 hover:text-sky-300 transition text-xs font-normal">ล้างตัวกรอง</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <!-- EMP ID Search -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">EMP ID (7 หลัก)</label>
+          <input type="text" id="filterEmpId" oninput="applyFilters()" placeholder="ค้นหา EMP ID..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <!-- WorkOrder Filter -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">WorkOrder</label>
+          <input type="text" id="filterWorkOrder" oninput="applyFilters()" placeholder="เช่น WO-260923..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <!-- Machine Filter -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Machine</label>
+          <select id="filterMachine" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
+            <option value="">ทั้งหมดทุกเครื่อง</option>
+          </select>
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Status</label>
+          <select id="filterStatus" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
+            <option value="">ทุกสถานะ</option>
+            <option value="IN_PROGRESS">IN_PROGRESS (กำลังทำ)</option>
+            <option value="COMPLETED">COMPLETED (เสร็จแล้ว)</option>
+          </select>
+        </div>
+
+        <!-- Date Filter -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">วันที่ (Date)</label>
+          <input type="date" id="filterDate" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Production Cards List Header -->
+    <div class="flex items-center justify-between pt-2">
+      <h2 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-list-check text-sky-400"></i> รายการกลุ่มงาน (Production Groups)
+      </h2>
+      <span id="groupCountBadge" class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">0 กลุ่ม</span>
+    </div>
+
+    <!-- Group Cards Container -->
+    <div id="dashboardCardsContainer" class="space-y-4">
+      <!-- Loading Placeholder -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-500">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-sky-400 mb-3"></i>
+        <p>กำลังโหลดข้อมูลจาก Google Sheets...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL 1: Add Work Modal (+ เพิ่มงาน) -->
+  <div id="addWorkModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50 transition-opacity">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <i class="fa-solid fa-plus text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">เพิ่มงานใหม่ / เริ่มงานรอบใหม่</h3>
+            <p class="text-xs text-slate-400">ระบบจะสร้าง Start Time อัตโนมัติ (GMT+7)</p>
+          </div>
+        </div>
+        <button onclick="closeAddWorkModal()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+      </div>
+
+      <!-- Add Work Form -->
+      <form id="addWorkForm" onsubmit="handleStartWorkSubmit(event)" class="space-y-4">
+        <!-- EMP ID Field -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            EMP ID <span class="text-red-400">* (ตัวเลข 7 หลัก)</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
+              <i class="fa-solid fa-id-card"></i>
+            </span>
+            <input type="text" id="inputEmpId" maxlength="7" placeholder="เช่น 0123456" required
+                   pattern="[0-9]{7}" title="กรุณากรอกตัวเลข 7 หลัก"
+                   class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono">
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">ต้องเป็นรหัสพนักงานตัวเลข 7 หลักเท่านั้น</p>
+        </div>
+
+        <!-- WorkOrder Field -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            WorkOrder <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
+              <i class="fa-solid fa-file-invoice"></i>
+            </span>
+            <input type="text" id="inputWorkOrder" placeholder="เช่น WO-260923-001" required
+                   class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono uppercase">
+          </div>
+        </div>
+
+        <!-- Machine Category Dropdown -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            Machine (เครื่องจักร) <span class="text-red-400">*</span>
+          </label>
+          <div class="space-y-2">
+            <select id="inputMachineSelect" onchange="toggleCustomMachineInput()" required
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+              <option value="" disabled selected>-- เลือกเครื่องจักร --</option>
+              <optgroup label="CDC Category">
+                <option value="CDC1">CDC1</option>
+                <option value="CDC2">CDC2</option>
+                <option value="CDC3">CDC3</option>
+                <option value="CDC4">CDC4</option>
+              </optgroup>
+              <optgroup label="CNC Category">
+                <option value="CNC-01">CNC-01</option>
+                <option value="CNC-02">CNC-02</option>
+                <option value="CNC-03">CNC-03</option>
+              </optgroup>
+              <optgroup label="LASER Category">
+                <option value="LASER-01">LASER-01</option>
+                <option value="LASER-02">LASER-02</option>
+              </optgroup>
+              <optgroup label="PRESS Category">
+                <option value="PRESS-01">PRESS-01</option>
+                <option value="PRESS-02">PRESS-02</option>
+              </optgroup>
+              <optgroup label="OTHER / เพิ่มเครื่องจักรใหม่">
+                <option value="CUSTOM">+ ระบุชื่อเครื่องจักรใหม่...</option>
+              </optgroup>
+            </select>
+
+            <!-- Custom Machine Input (If selected CUSTOM) -->
+            <input type="text" id="inputCustomMachine" placeholder="ระบุชื่อเครื่องจักรใหม่ (เช่น BEND1)..." 
+                   class="hidden w-full bg-slate-800 border border-amber-500/50 rounded-xl px-3 py-2 text-sm text-amber-200 placeholder-slate-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-800">
+          <button type="button" onclick="closeAddWorkModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
+          <button type="submit" id="btnSubmitStartWork" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-play"></i>
+            <span>เริ่มงานทันที (Start Work)</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Google Apps Script Backend Code Setup Guide -->
+  <div id="gasCodeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+        <div class="flex items-center gap-2 text-amber-400">
+          <i class="fa-solid fa-code text-lg"></i>
+          <h3 class="text-base font-bold text-white">Google Apps Script Code (Code.gs)</h3>
+        </div>
+        <button onclick="closeGasCodeModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+      </div>
+      
+      <p class="text-xs text-slate-400 mb-3">
+        นำ Source Code ด้านล่างนี้ไปใส่ใน Google Apps Script Editor ของชีต <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA</code> ใน Sheet ชื่อ <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">Work_Log</code> แล้วทำ Web App Deployment ให้สิทธิ์ "Anyone" (ทุกคน)
+      </p>
+
+      <div class="relative flex-grow bg-slate-950 border border-slate-800 rounded-xl p-3 overflow-hidden">
+        <textarea id="gasCodeTextArea" readonly class="w-full h-72 bg-transparent text-emerald-400 font-mono text-xs focus:outline-none resize-none leading-relaxed"></textarea>
+      </div>
+
+      <div class="pt-4 flex items-center justify-between">
+        <span class="text-xs text-slate-500">LockService & TimeZone: Asia/Bangkok GMT+7</span>
+        <button onclick="copyGasCode()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg">
+          <i class="fa-solid fa-copy"></i>
+          <span>คัดลอก Code GAS</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* --------------------------------------------------------
+       CONFIGURATIONS & CONSTANTS
+       -------------------------------------------------------- */
+    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxzofAde3w-9HwRXRyGQ_d6_Oc5vVF8u-TEDlpYR7nmlaXO0Dk80jyGMSoPiBVd_RoT6Q/exec";
+    const GOOGLE_SHEET_ID = "1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA";
+
+    let rawWorkLogs = [];
+    let timerInterval = null;
+
+    /* --------------------------------------------------------
+       GOOGLE APPS SCRIPT BACKEND CODE STRING (Embedded)
+       -------------------------------------------------------- */
+    const GAS_BACKEND_CODE = `/**
+ * PP BOARD - Google Apps Script Backend Code
+ * Sheet ID: 1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA
+ * Tab Name: Work_Log
+ */
+
+const SHEET_ID = '1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA';
+const TAB_NAME = 'Work_Log';
+
+function getSheet() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName(TAB_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(TAB_NAME);
+    // Setup Headers
+    sheet.appendRow(['ID', 'EMP_ID', 'WorkOrder', 'Machine', 'StartTime', 'EndTime', 'Quantity', 'Duration', 'Status']);
+    sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#f3f4f6');
+  }
+  return sheet;
+}
+
+function doGet(e) {
+  const action = e.parameter.action || 'getWorkLogs';
+  
+  if (action === 'getWorkLogs') {
+    return handleGetWorkLogs();
+  }
+  
+  return responseJSON({ status: 'error', message: 'Invalid GET action' });
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  try {
+    // Wait up to 10 seconds for lock to prevent overlap write
+    if (!lock.waitLock(10000)) {
+      return responseJSON({ status: 'error', message: 'ระบบกำลังประมวลผลคำสั่งอื่นอยู่ กรุณาลองใหม่อีกครั้ง' });
+    }
+
+    let contents = {};
+    if (e && e.postData && e.postData.contents) {
+      contents = JSON.parse(e.postData.contents);
+    } else if (e && e.parameter) {
+      contents = e.parameter;
+    }
+
+    const action = contents.action;
+
+    if (action === 'startWork') {
+      return handleStartWork(contents);
+    } else if (action === 'completeWork') {
+      return handleCompleteWork(contents);
+    }
+
+    return responseJSON({ status: 'error', message: 'Invalid action requested' });
+
+  } catch (err) {
+    return responseJSON({ status: 'error', message: err.toString() });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function handleGetWorkLogs() {
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) {
+    return responseJSON({ status: 'success', data: [] });
+  }
+
+  const headers = data[0];
+  const rows = data.slice(1);
+  const result = rows.map(row => ({
+    id: String(row[0]),
+    empId: String(row[1]),
+    workOrder: String(row[2]),
+    machine: String(row[3]),
+    startTime: row[4] ? String(row[4]) : '',
+    endTime: row[5] ? String(row[5]) : '',
+    quantity: row[6] !== '' ? Number(row[6]) : '',
+    duration: row[7] ? String(row[7]) : '',
+    status: String(row[8])
+  }));
+
+  return responseJSON({ status: 'success', data: result });
+}
+
+function handleStartWork(params) {
+  const empId = String(params.empId).trim();
+  const workOrder = String(params.workOrder).trim();
+  const machine = String(params.machine).trim();
+
+  if (!empId || empId.length !== 7 || isNaN(empId)) {
+    return responseJSON({ status: 'error', message: 'EMP ID ต้องเป็นตัวเลข 7 หลักเท่านั้น' });
+  }
+
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+
+  // Rule 5: Backend Check - No overlapping active job for same EMP ID
+  for (let i = 1; i < data.length; i++) {
+    const existingEmp = String(data[i][1]).trim();
+    const existingStatus = String(data[i][8]).trim();
+    if (existingEmp === empId && existingStatus === 'IN_PROGRESS') {
+      return responseJSON({
+        status: 'error',
+        isOverlapping: true,
+        title: 'ไม่สามารถเริ่มงานใหม่ได้',
+        message: 'รหัสพนักงานนี้มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน จึงจะสามารถเริ่มงานรอบถัดไปได้',
+        activeJob: {
+          workOrder: String(data[i][2]),
+          machine: String(data[i][3]),
+          startTime: String(data[i][4])
+        }
+      });
+    }
+  }
+
+  // Create New Session Entry
+  const newId = 'LOG-' + new Date().getTime();
+  const startTimeStr = getFormattedThaiTime(new Date());
+
+  sheet.appendRow([
+    newId,
+    empId,
+    workOrder,
+    machine,
+    startTimeStr,
+    '', // EndTime
+    '', // Quantity
+    '', // Duration
+    'IN_PROGRESS'
+  ]);
+
+  return responseJSON({
+    status: 'success',
+    message: 'บันทึกเวลาเริ่มงานสำเร็จ',
+    data: {
+      id: newId,
+      empId: empId,
+      workOrder: workOrder,
+      machine: machine,
+      startTime: startTimeStr,
+      status: 'IN_PROGRESS'
+    }
+  });
+}
+
+function handleCompleteWork(params) {
+  const logId = String(params.id).trim();
+  const quantity = Number(params.quantity);
+
+  if (isNaN(quantity) || quantity < 0) {
+    return responseJSON({ status: 'error', message: 'กรุณาระบุจำนวนชิ้นงานให้ถูกต้อง' });
+  }
+
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === logId) {
+      if (data[i][8] !== 'IN_PROGRESS') {
+        return responseJSON({ status: 'error', message: 'งานนี้ถูกปิดไปแล้ว หรือไม่ได้อยู่ในสถานะ IN_PROGRESS' });
+      }
+
+      const now = new Date();
+      const endTimeStr = getFormattedThaiTime(now);
+      const startTimeStr = data[i][4];
+      const durationStr = calculateDurationString(startTimeStr, now);
+
+      sheet.getRange(i + 1, 6).setValue(endTimeStr); // EndTime
+      sheet.getRange(i + 1, 7).setValue(quantity);   // Quantity
+      sheet.getRange(i + 1, 8).setValue(durationStr);// Duration
+      sheet.getRange(i + 1, 9).setValue('COMPLETED'); // Status
+
+      return responseJSON({
+        status: 'success',
+        message: 'ปิดงานสำเร็จ',
+        data: {
+          id: logId,
+          endTime: endTimeStr,
+          quantity: quantity,
+          duration: durationStr,
+          status: 'COMPLETED'
+        }
+      });
+    }
+  }
+
+  return responseJSON({ status: 'error', message: 'ไม่พบรายการงานที่ระบุ' });
+}
+
+function getFormattedThaiTime(dateObj) {
+  // GMT+7 Thailand Formatting: YYYY-MM-DD HH:mm:ss
+  const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
+  const thaiDate = new Date(utc + (3600000 * 7));
+  
+  const y = thaiDate.getFullYear();
+  const m = String(thaiDate.getMonth() + 1).padStart(2, '0');
+  const d = String(thaiDate.getDate()).padStart(2, '0');
+  const hh = String(thaiDate.getHours()).padStart(2, '0');
+  const mm = String(thaiDate.getMinutes()).padStart(2, '0');
+  const ss = String(thaiDate.getSeconds()).padStart(2, '0');
+
+  return y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss;
+}
+
+function calculateDurationString(startTimeStr, endDate) {
+  try {
+    const parts = startTimeStr.split(' ');
+    const dParts = parts[0].split('-');
+    const tParts = parts[1].split(':');
+    const startDate = new Date(dParts[0], dParts[1] - 1, dParts[2], tParts[0], tParts[1], tParts[2]);
+
+    const utcEnd = endDate.getTime() + (endDate.getTimezoneOffset() * 60000);
+    const thaiEndDate = new Date(utcEnd + (3600000 * 7));
+
+    let diffSecs = Math.floor((thaiEndDate.getTime() - startDate.getTime()) / 1000);
+    if (diffSecs < 0) diffSecs = 0;
+
+    const hrs = Math.floor(diffSecs / 3600);
+    const mins = Math.floor((diffSecs % 3600) / 60);
+    const secs = diffSecs % 60;
+
+    return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+  } catch(e) {
+    return '00:00:00';
+  }
+}
+
+function responseJSON(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+    // Initialize Page on Load
+    window.onload = function() {
+      updateThaiClock();
+      setInterval(updateThaiClock, 1000);
+      
+      // Start live duration ticker
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateActiveDurations, 1000);
+
+      // Fetch Work Logs from Backend
+      fetchWorkLogs();
+    };
+
+    // Live Clock GMT+7
+    function updateThaiClock() {
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const thaiTime = new Date(utc + (3600000 * 7));
+      
+      const timeStr = thaiTime.toLocaleTimeString('th-TH', { hour12: false });
+      const dateStr = thaiTime.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+      
+      document.getElementById('thaiClock').innerText = `${dateStr} ${timeStr}`;
+    }
+
+    async function fetchWorkLogs() {
+      const refreshIcon = document.getElementById('refreshIcon');
+      refreshIcon.classList.add('fa-spin');
+      
+      const syncStatus = document.getElementById('syncStatus');
+      syncStatus.className = 'flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
+      syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span><span>กำลังดึงข้อมูล...</span>';
+
+      try {
+        const response = await fetch(`${GAS_ENDPOINT}?action=getWorkLogs&t=${Date.now()}`);
+        const resData = await response.json();
+
+        if (resData.status === 'success') {
+          rawWorkLogs = resData.data || [];
+          populateMachineFilterOptions();
+          renderDashboard();
+          
+          syncStatus.className = 'flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
+          syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>เชื่อมต่อสำเร็จ</span>';
+        } else {
+          showErrorToast('ไม่สามารถดึงข้อมูลได้: ' + resData.message);
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        syncStatus.className = 'flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
+        syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400"></span><span>การเชื่อมต่อขัดข้อง</span>';
+      } finally {
+        refreshIcon.classList.remove('fa-spin');
+      }
+    }
+
+    function renderDashboard() {
+      const container = document.getElementById('dashboardCardsContainer');
+      
+      // Apply Client Filters
+      const filterEmp = document.getElementById('filterEmpId').value.trim().toLowerCase();
+      const filterWo = document.getElementById('filterWorkOrder').value.trim().toLowerCase();
+      const filterMac = document.getElementById('filterMachine').value.trim();
+      const filterStat = document.getElementById('filterStatus').value;
+      const filterDt = document.getElementById('filterDate').value;
+
+      let filteredLogs = rawWorkLogs.filter(item => {
+        if (filterEmp && !item.empId.toLowerCase().includes(filterEmp)) return false;
+        if (filterWo && !item.workOrder.toLowerCase().includes(filterWo)) return false;
+        if (filterMac && item.machine !== filterMac) return false;
+        if (filterStat && item.status !== filterStat) return false;
+        if (filterDt && !item.startTime.startsWith(filterDt)) return false;
+        return true;
+      });
+
+      // Update Top Statistics
+      updateTopStats(rawWorkLogs);
+
+      if (filteredLogs.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-500 space-y-3">
+            <i class="fa-solid fa-folder-open text-4xl text-slate-600"></i>
+            <p class="text-slate-300 font-medium">ไม่พบข้อมูลงานตามเงื่อนไขที่เลือก</p>
+            <p class="text-xs">กดปุ่ม "+ เพิ่มงาน" ด้านบนเพื่อเริ่มบันทึกการทำงานใหม่</p>
+          </div>
+        `;
+        document.getElementById('groupCountBadge').innerText = '0 กลุ่ม';
+        return;
+      }
+
+      /* CRITICAL REQUIREMENT 4:
+         Group by (EMP ID + WorkOrder + Machine).
+         If EMP ID, WorkOrder, Machine are identical -> Same Group Card.
+         If Machine changes -> Create NEW Group Card!
+      */
+      const groupsMap = {};
+
+      filteredLogs.forEach(log => {
+        // Unique key for exact group matching
+        const key = `${log.empId}_${log.workOrder}_${log.machine}`;
+        if (!groupsMap[key]) {
+          groupsMap[key] = {
+            empId: log.empId,
+            workOrder: log.workOrder,
+            machine: log.machine,
+            sessions: []
+          };
+        }
+        groupsMap[key].sessions.push(log);
+      });
+
+      const groupKeys = Object.keys(groupsMap);
+      document.getElementById('groupCountBadge').innerText = `${groupKeys.length} กลุ่ม`;
+
+      let html = '';
+
+      groupKeys.forEach((key, index) => {
+        const group = groupsMap[key];
+        
+        // Sort sessions chronologically (Oldest round to Newest)
+        group.sessions.sort((a, b) => new Date(a.startTime.replace(/-/g, '/')) - new Date(b.startTime.replace(/-/g, '/')));
+
+        const hasActiveSession = group.sessions.some(s => s.status === 'IN_PROGRESS');
+
+        html += `
+          <!-- Group Card -->
+          <div class="bg-slate-900 border ${hasActiveSession ? 'border-emerald-500/50 glow-progress' : 'border-slate-800'} rounded-2xl p-5 shadow-xl transition-all">
+            
+            <!-- Group Header -->
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4 mb-4">
+              <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <!-- EMP ID Badge -->
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                  <i class="fa-solid fa-user-gear text-sky-400 text-xs"></i>
+                  <span class="text-xs text-slate-400">EMP ID:</span>
+                  <span class="font-mono font-bold text-white tracking-wide">${escapeHtml(group.empId)}</span>
+                </div>
+
+                <!-- WorkOrder Badge -->
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                  <i class="fa-solid fa-file-invoice text-amber-400 text-xs"></i>
+                  <span class="text-xs text-slate-400">WO:</span>
+                  <span class="font-mono font-bold text-amber-300">${escapeHtml(group.workOrder)}</span>
+                </div>
+
+                <!-- Machine Badge -->
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                  <i class="fa-solid fa-industry text-purple-400 text-xs"></i>
+                  <span class="text-xs text-slate-400">Machine:</span>
+                  <span class="font-bold text-purple-300">${escapeHtml(group.machine)}</span>
+                </div>
+              </div>
+
+              <!-- Overall Status Badge -->
+              <div>
+                ${hasActiveSession 
+                  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                       กำลังดำเนินการ (IN_PROGRESS)
+                     </span>`
+                  : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                       <i class="fa-solid fa-check text-xs"></i> เสร็จสิ้นแล้วทุกรอบ
+                     </span>`
+                }
+              </div>
+            </div>
+
+            <!-- Sessions List (Rounds Table) -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 pb-2">
+                    <th class="py-2 px-3">รอบที่ (Round)</th>
+                    <th class="py-2 px-3">เวลาเริ่ม (Start Time)</th>
+                    <th class="py-2 px-3">เวลาจบ (End Time)</th>
+                    <th class="py-2 px-3">ระยะเวลา (Duration)</th>
+                    <th class="py-2 px-3 text-right">จำนวนชิ้นงาน (Quantity)</th>
+                    <th class="py-2 px-3 text-center">การจัดการ (Action)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/40 text-xs">
+                  ${group.sessions.map((sess, idx) => renderSessionRow(sess, idx + 1)).join('')}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderSessionRow(session, roundNum) {
+      const isRunning = session.status === 'IN_PROGRESS';
+
+      return `
+        <tr class="${isRunning ? 'bg-emerald-950/20' : 'hover:bg-slate-800/30'} transition">
+          <!-- Round # -->
+          <td class="py-3 px-3 font-medium text-slate-300">
+            <span class="bg-slate-800 px-2 py-1 rounded-lg border border-slate-700/60 font-mono">
+              รอบที่ ${roundNum}
+            </span>
+          </td>
+
+          <!-- Start Time -->
+          <td class="py-3 px-3 font-mono text-slate-300">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-regular fa-clock text-emerald-400 text-[11px]"></i>
+              <span>${escapeHtml(session.startTime)}</span>
+            </div>
+          </td>
+
+          <!-- End Time -->
+          <td class="py-3 px-3 font-mono text-slate-300">
+            ${isRunning 
+              ? `<span class="text-slate-500 italic">กำลังทำงาน...</span>`
+              : `<div class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-sky-400 text-[11px]"></i><span>${escapeHtml(session.endTime)}</span></div>`
+            }
+          </td>
+
+          <!-- Duration -->
+          <td class="py-3 px-3 font-mono font-medium">
+            ${isRunning 
+              ? `<span id="active-duration-${session.id}" data-starttime="${session.startTime}" class="text-emerald-400 flex items-center gap-1">
+                   <i class="fa-solid fa-stopwatch animate-pulse"></i>
+                   <span>คำนวณเวลา...</span>
+                 </span>`
+              : `<span class="text-slate-300">${escapeHtml(session.duration || '-')}</span>`
+            }
+          </td>
+
+          <!-- Quantity (NO AGGREGATION RULE: Distinct per session) -->
+          <td class="py-3 px-3 text-right">
+            ${isRunning 
+              ? `<div class="flex items-center justify-end gap-1">
+                   <input type="number" id="qty-input-${session.id}" min="0" placeholder="ระบุจำนวน..." 
+                          class="w-28 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-1 text-right text-emerald-300 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                   <span class="text-slate-400 text-xs">ชิ้น</span>
+                 </div>`
+              : `<span class="font-mono font-bold text-sky-300 text-sm">${session.quantity !== '' ? Number(session.quantity).toLocaleString() : '0'}</span> <span class="text-slate-400 text-xs">ชิ้น</span>`
+            }
+          </td>
+
+          <!-- Action Status / Close Button -->
+          <td class="py-3 px-3 text-center">
+            ${isRunning 
+              ? `<button onclick="handleCompleteWork('${session.id}')" 
+                         class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md transition flex items-center gap-1.5 mx-auto active:scale-95">
+                   <i class="fa-solid fa-flag-checkered"></i>
+                   <span>ปิดงาน</span>
+                 </button>`
+              : `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
+                   <i class="fa-solid fa-check-double text-sky-400"></i> เสร็จสิ้น
+                 </span>`
+            }
+          </td>
+        </tr>
+      `;
+    }
+
+    function updateActiveDurations() {
+      const activeElements = document.querySelectorAll('[id^="active-duration-"]');
+      const now = new Date();
+      // UTC + 7
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const thaiNow = new Date(utc + (3600000 * 7));
+
+      activeElements.forEach(el => {
+        const startStr = el.getAttribute('data-starttime');
+        if (!startStr) return;
+
+        try {
+          const parts = startStr.split(' ');
+          const dParts = parts[0].split('-');
+          const tParts = parts[1].split(':');
+          const startDate = new Date(dParts[0], dParts[1] - 1, dParts[2], tParts[0], tParts[1], tParts[2]);
+
+          let diffSecs = Math.floor((thaiNow.getTime() - startDate.getTime()) / 1000);
+          if (diffSecs < 0) diffSecs = 0;
+
+          const hrs = Math.floor(diffSecs / 3600);
+          const mins = Math.floor((diffSecs % 3600) / 60);
+          const secs = diffSecs % 60;
+
+          const formatted = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+          el.innerHTML = `<i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ${formatted}`;
+        } catch(e) {
+          el.innerText = '00:00:00';
+        }
+      });
+    }
+
+    async function handleStartWorkSubmit(e) {
+      e.preventDefault();
+
+      const empId = document.getElementById('inputEmpId').value.trim();
+      const workOrder = document.getElementById('inputWorkOrder').value.trim();
+      let machine = document.getElementById('inputMachineSelect').value;
+
+      if (machine === 'CUSTOM') {
+        machine = document.getElementById('inputCustomMachine').value.trim();
+      }
+
+      if (!empId || empId.length !== 7 || isNaN(empId)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ข้อมูลไม่ถูกต้อง',
+          text: 'กรุณากรอก EMP ID เป็นตัวเลข 7 หลักเท่านั้น',
+          background: '#0f172a',
+          color: '#f8fafc',
+          confirmButtonColor: '#0284c7'
+        });
+        return;
+      }
+
+      if (!workOrder || !machine) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ข้อมูลไม่ครบถ้วน',
+          text: 'กรุณากรอก WorkOrder และระบุ Machine',
+          background: '#0f172a',
+          color: '#f8fafc',
+          confirmButtonColor: '#0284c7'
+        });
+        return;
+      }
+
+      /* CRITICAL REQUIREMENT 5 (Frontend Pre-Check):
+         Check if the same EMP ID already has an IN_PROGRESS job
+      */
+      const existingActive = rawWorkLogs.find(item => item.empId === empId && item.status === 'IN_PROGRESS');
+      if (existingActive) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ไม่สามารถเริ่มงานใหม่ได้',
+          html: `
+            <div class="text-left space-y-2 text-sm text-slate-300">
+              <p class="text-rose-400 font-semibold">รหัสพนักงานนี้มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน จึงจะสามารถเริ่มงานรอบถัดไปได้</p>
+              <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-2 space-y-1 font-mono text-xs">
+                <div><span class="text-slate-400">EMP ID:</span> <span class="text-white font-bold">${escapeHtml(empId)}</span></div>
+                <div><span class="text-slate-400">WorkOrder ที่ค้างอยู่:</span> <span class="text-amber-300 font-bold">${escapeHtml(existingActive.workOrder)}</span></div>
+                <div><span class="text-slate-400">Machine:</span> <span class="text-purple-300 font-bold">${escapeHtml(existingActive.machine)}</span></div>
+                <div><span class="text-slate-400">เวลาเริ่ม:</span> <span class="text-emerald-300">${escapeHtml(existingActive.startTime)}</span></div>
+              </div>
+            </div>
+          `,
+          background: '#0f172a',
+          color: '#f8fafc',
+          confirmButtonColor: '#e11d48',
+          confirmButtonText: 'เข้าใจแล้ว'
+        });
+        return;
+      }
+
+      // Submit to Backend
+      const btn = document.getElementById('btnSubmitStartWork');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+
+      try {
+        const response = await fetch(GAS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'startWork',
+            empId: empId,
+            workOrder: workOrder,
+            machine: machine
+          })
+        });
+
+        const resData = await response.json();
+
+        if (resData.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'เริ่มงานสำเร็จ!',
+            text: `บันทึกเวลาเริ่มงานสำหรับ EMP ${empId} เรียบร้อยแล้ว`,
+            background: '#0f172a',
+            color: '#f8fafc',
+            confirmButtonColor: '#10b981',
+            timer: 2000
+          });
+          closeAddWorkModal();
+          fetchWorkLogs();
+        } else if (resData.isOverlapping) {
+          // Backend Rule 5 Overlap Validation triggered
+          Swal.fire({
+            icon: 'error',
+            title: resData.title || 'ไม่สามารถเริ่มงานใหม่ได้',
+            html: `
+              <div class="text-left space-y-2 text-sm text-slate-300">
+                <p class="text-rose-400 font-semibold">${resData.message}</p>
+                ${resData.activeJob ? `
+                  <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-2 space-y-1 font-mono text-xs">
+                    <div><span class="text-slate-400">WorkOrder ที่ค้างอยู่:</span> <span class="text-amber-300 font-bold">${escapeHtml(resData.activeJob.workOrder)}</span></div>
+                    <div><span class="text-slate-400">Machine:</span> <span class="text-purple-300 font-bold">${escapeHtml(resData.activeJob.machine)}</span></div>
+                    <div><span class="text-slate-400">เวลาเริ่ม:</span> <span class="text-emerald-300">${escapeHtml(resData.activeJob.startTime)}</span></div>
+                  </div>
+                ` : ''}
+              </div>
+            `,
+            background: '#0f172a',
+            color: '#f8fafc',
+            confirmButtonColor: '#e11d48'
+          });
+        } else {
+          showErrorToast(resData.message);
+        }
+      } catch (err) {
+        showErrorToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play"></i><span>เริ่มงานทันที (Start Work)</span>';
+      }
+    }
+
+    async function handleCompleteWork(logId) {
+      const qtyInput = document.getElementById(`qty-input-${logId}`);
+      if (!qtyInput) return;
+
+      const qtyVal = qtyInput.value.trim();
+
+      if (qtyVal === '' || isNaN(qtyVal) || Number(qtyVal) < 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณาระบุจำนวนชิ้นงาน',
+          text: 'ป้อนจำนวนชิ้นงานที่ผลิตได้ในรอบนี้ (เช่น 1000)',
+          background: '#0f172a',
+          color: '#f8fafc',
+          confirmButtonColor: '#f59e0b'
+        });
+        qtyInput.focus();
+        return;
+      }
+
+      const formattedQty = Number(qtyVal).toLocaleString();
+
+      const confirmResult = await Swal.fire({
+        title: 'ยืนยันการปิดงาน?',
+        html: `จำนวนชิ้นงานในรอบนี้: <b class="text-emerald-400 text-lg font-mono">${formattedQty} ชิ้น</b>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ยืนยันปิดงาน',
+        cancelButtonText: 'ยกเลิก',
+        background: '#0f172a',
+        color: '#f8fafc'
+      });
+
+      if (!confirmResult.isConfirmed) return;
+
+      try {
+        Swal.fire({
+          title: 'กำลังบันทึกปิดงาน...',
+          text: 'กรุณารอสักครู่',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+          background: '#0f172a',
+          color: '#f8fafc'
+        });
+
+        const response = await fetch(GAS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'completeWork',
+            id: logId,
+            quantity: Number(qtyVal)
+          })
+        });
+
+        const resData = await response.json();
+
+        if (resData.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'ปิดงานเรียบร้อย!',
+            text: `บันทึก ${formattedQty} ชิ้น สรุปเวลาเรียบร้อยแล้ว`,
+            background: '#0f172a',
+            color: '#f8fafc',
+            confirmButtonColor: '#10b981',
+            timer: 2000
+          });
+          fetchWorkLogs();
+        } else {
+          showErrorToast(resData.message);
+        }
+      } catch (err) {
+        showErrorToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+      }
+    }
+
+    function updateTopStats(logs) {
+      const inProgress = logs.filter(l => l.status === 'IN_PROGRESS').length;
+      const completed = logs.filter(l => l.status === 'COMPLETED').length;
+      
+      const uniqueEmps = new Set(logs.map(l => l.empId)).size;
+      const uniqueGroups = new Set(logs.map(l => `${l.empId}_${l.workOrder}_${l.machine}`)).size;
+
+      document.getElementById('statInProgress').innerText = inProgress;
+      document.getElementById('statCompleted').innerText = completed;
+      document.getElementById('statTotalGroups').innerText = uniqueGroups;
+      document.getElementById('statActiveEmps').innerText = uniqueEmps;
+    }
+
+    function populateMachineFilterOptions() {
+      const select = document.getElementById('filterMachine');
+      const currentVal = select.value;
+      
+      const machines = new Set(rawWorkLogs.map(l => l.machine).filter(Boolean));
+      
+      let html = '<option value="">ทั้งหมดทุกเครื่อง</option>';
+      machines.forEach(m => {
+        html += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`;
+      });
+      
+      select.innerHTML = html;
+      select.value = currentVal;
+    }
+
+    function toggleCustomMachineInput() {
+      const select = document.getElementById('inputMachineSelect');
+      const customInput = document.getElementById('inputCustomMachine');
+      if (select.value === 'CUSTOM') {
+        customInput.classList.remove('hidden');
+        customInput.required = true;
+        customInput.focus();
+      } else {
+        customInput.classList.add('hidden');
+        customInput.required = false;
+      }
+    }
+
+    function applyFilters() {
+      renderDashboard();
+    }
+
+    function resetFilters() {
+      document.getElementById('filterEmpId').value = '';
+      document.getElementById('filterWorkOrder').value = '';
+      document.getElementById('filterMachine').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterDate').value = '';
+      renderDashboard();
+    }
+
+    function openAddWorkModal() {
+      document.getElementById('addWorkForm').reset();
+      toggleCustomMachineInput();
+      document.getElementById('addWorkModal').classList.remove('hidden');
+      document.getElementById('addWorkModal').classList.add('flex');
+    }
+
+    function closeAddWorkModal() {
+      document.getElementById('addWorkModal').classList.add('hidden');
+      document.getElementById('addWorkModal').classList.remove('flex');
+    }
+
+    function openGasCodeModal() {
+      document.getElementById('gasCodeTextArea').value = GAS_BACKEND_CODE;
+      document.getElementById('gasCodeModal').classList.remove('hidden');
+      document.getElementById('gasCodeModal').classList.add('flex');
+    }
+
+    function closeGasCodeModal() {
+      document.getElementById('gasCodeModal').classList.add('hidden');
+      document.getElementById('gasCodeModal').classList.remove('flex');
+    }
+
+    function copyGasCode() {
+      const textArea = document.getElementById('gasCodeTextArea');
+      textArea.select();
+      document.execCommand('copy');
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'คัดลอก Code แล้ว!',
+        text: 'นำไปวางใน Google Apps Script Editor แล้วสั่ง Deploy ได้ทันที',
+        background: '#0f172a',
+        color: '#f8fafc',
+        confirmButtonColor: '#10b981',
+        timer: 2000
+      });
+    }
+
+    function showErrorToast(msg) {
+      Swal.fire({
+        icon: 'error',
+        title: 'แจ้งเตือนระบบ',
+        text: msg,
+        background: '#0f172a',
+        color: '#f8fafc',
+        confirmButtonColor: '#0284c7'
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

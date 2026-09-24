@@ -1025,11 +1025,30 @@ function responseJSON(obj) {
 if (log) {
   log.endTime = result.data.endTime;
   log.quantity = result.data.quantity;
-  log.duration = result.data.duration;
   log.status = result.data.status;
 
- renderDashboard();
+  // คำนวณ Duration ทันทีจาก StartTime - EndTime
+  const startDate = parseAppDateString(log.startTime);
+  const endDate = parseAppDateString(log.endTime);
+
+  if (startDate && endDate) {
+    const diffSecs = Math.max(
+      0,
+      Math.floor((endDate.getTime() - startDate.getTime()) / 1000)
+    );
+
+    const hrs = Math.floor(diffSecs / 3600);
+    const mins = Math.floor((diffSecs % 3600) / 60);
+    const secs = diffSecs % 60;
+
+    log.duration =
+      `${String(hrs).padStart(2, '0')}:` +
+      `${String(mins).padStart(2, '0')}:` +
+      `${String(secs).padStart(2, '0')}`;
   }
+
+  renderDashboard();
+}
 } else {
     showErrorToast(result.message || 'เกิดข้อผิดพลาดในการปิดงาน');
         }

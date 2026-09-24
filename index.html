@@ -478,7 +478,7 @@ function handleStartWork(params) {
       status: 'error',
       isOverlapping: true,
       title: 'ไม่สามารถเริ่มงานซ้ำได้',
-      message: `WO ${workOrder} ที่เครื่อง ${machine} กำลังดำเนินการอยู่ กรุณาปิดงานรอบปัจจุบันก่อน`,
+      message: 'WO ' + workOrder + ' ที่เครื่อง ' + machine + ' กำลังดำเนินการอยู่ กรุณาปิดงานรอบปัจจุบันก่อน',
       activeJob: {
         workOrder: String(data[i][2]),
         machine: String(data[i][3]),

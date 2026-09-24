@@ -529,9 +529,21 @@ function handleCompleteWork(params) {
       }
 
       const now = new Date();
-      const endTimeStr = getFormattedThaiTime(now);
-      const startTimeStr = String(data[i][4]);
-      const durationStr = calculateDurationString(startTimeStr, endTimeStr);
+
+const startTimeStr = String(data[i][4]).trim();
+const endTimeStr = getFormattedThaiTime(now);
+
+Logger.log('===== COMPLETE WORK =====');
+Logger.log('logId = ' + logId);
+Logger.log('startTimeStr = [' + startTimeStr + ']');
+Logger.log('endTimeStr = [' + endTimeStr + ']');
+
+const durationStr = calculateDurationString(
+  startTimeStr,
+  now
+);
+
+Logger.log('durationStr = [' + durationStr + ']');
 
       sheet.getRange(i + 1, 6).setValue(endTimeStr);  // EndTime
       sheet.getRange(i + 1, 7).setValue(quantity);    // Quantity
@@ -566,73 +578,81 @@ function calculateDurationString(startTimeValue, endDate) {
       return '00:00:00';
     }
 
-    let startDate;
+    const startTimeStr = String(startTimeValue).trim();
 
-    if (startTimeValue instanceof Date) {
-      startDate = startTimeValue;
-    } else {
-      const startTimeStr = String(startTimeValue).trim();
+    const match = startTimeStr.match(
+      /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/
+    );
 
-      const match = startTimeStr.match(
-        /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/
-      );
+    if (!match) {
+      Logger.log('START TIME FORMAT ERROR = [' + startTimeStr + ']');
+      return '00:00:00';
+    }
 
-      if (!match) {
-        return '00:00:00';
-      }
-
-      startDate = new Date(
+    // แปลงเวลาเริ่มงานเป็น timestamp โดยใช้ UTC
+    // เพื่อไม่ให้ Timezone ของ GAS มีผลต่อการคำนวณ
+    const startSeconds =
+      Date.UTC(
         Number(match[1]),
         Number(match[2]) - 1,
         Number(match[3]),
         Number(match[4]),
         Number(match[5]),
         Number(match[6])
-      );
-    }
+      ) / 1000;
 
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    // endDate คือ Date ที่มาจาก new Date()
+    // แปลงให้เป็นเวลา Bangkok ก่อน แล้วจึงคำนวณ
+    const endTimeStr = Utilities.formatDate(
+      endDate,
+      'Asia/Bangkok',
+      'yyyy-MM-dd HH:mm:ss'
+    );
+
+    const endMatch = endTimeStr.match(
+      /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/
+    );
+
+    if (!endMatch) {
+      Logger.log('END TIME FORMAT ERROR = [' + endTimeStr + ']');
       return '00:00:00';
     }
 
-    let diffSecs = Math.floor(
-      (endDate.getTime() - startDate.getTime()) / 1000
-    );
+    const endSeconds =
+      Date.UTC(
+        Number(endMatch[1]),
+        Number(endMatch[2]) - 1,
+        Number(endMatch[3]),
+        Number(endMatch[4]),
+        Number(endMatch[5]),
+        Number(endMatch[6])
+      ) / 1000;
 
-    if (diffSecs < 0) diffSecs = 0;
+    let diffSecs = Math.floor(endSeconds - startSeconds);
+
+    if (diffSecs < 0) {
+      diffSecs = 0;
+    }
 
     const hrs = Math.floor(diffSecs / 3600);
     const mins = Math.floor((diffSecs % 3600) / 60);
     const secs = diffSecs % 60;
 
-    return (
+    const result =
       String(hrs).padStart(2, '0') + ':' +
       String(mins).padStart(2, '0') + ':' +
-      String(secs).padStart(2, '0')
-    );
+      String(secs).padStart(2, '0');
+
+    Logger.log('START = ' + startTimeStr);
+    Logger.log('END = ' + endTimeStr);
+    Logger.log('RESULT = ' + result);
+
+    return result;
 
   } catch (e) {
     Logger.log('calculateDurationString ERROR: ' + e);
     return '00:00:00';
   }
-}
-
-function parseDateStringBackend(str) {
-  if (!str) return null;
-  const s = String(str).trim();
-  const match = s.match(/^(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})[ T](\\d{1,2}):(\\d{1,2}):(\\d{1,2})/);
-  if (match) {
-    return new Date(
-      Number(match[1]),
-      Number(match[2]) - 1,
-      Number(match[3]),
-      Number(match[4]),
-      Number(match[5]),
-      Number(match[6])
-    );
-  }
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d;
 }
 
 function responseJSON(obj) {

@@ -1018,9 +1018,19 @@ function responseJSON(obj) {
             color: '#f8fafc',
             confirmButtonColor: '#0284c7'
           });
-          fetchWorkLogs();
-        } else {
-          showErrorToast(result.message || 'เกิดข้อผิดพลาดในการปิดงาน');
+          
+          const log = rawWorkLogs.find(item => item.id === id);
+
+if (log) {
+  log.endTime = result.data.endTime;
+  log.quantity = result.data.quantity;
+  log.duration = result.data.duration;
+  log.status = result.data.status;
+
+ renderDashboard();
+  }
+} else {
+    showErrorToast(result.message || 'เกิดข้อผิดพลาดในการปิดงาน');
         }
       } catch (err) {
         console.error('Error submitting complete work:', err);

@@ -1112,16 +1112,22 @@ if (log) {
         const resData = await response.json();
 
         if (resData.status === 'success') {
-          closeAddWorkModal();
-          Swal.fire({
-            icon: 'success',
-            title: 'เริ่มงานสำเร็จ!',
-            text: `เริ่มต้นบันทึกเวลาสำหรับ WO: ${workOrder} (${machine})`,
-            background: '#0f172a',
-            color: '#f8fafc',
-            confirmButtonColor: '#10b981'
-          });
-          fetchWorkLogs();
+  closeAddWorkModal();
+
+  Swal.fire({
+    icon: 'success',
+    title: 'เริ่มงานสำเร็จ!',
+    text: `เริ่มต้นบันทึกเวลาสำหรับ WO: ${workOrder} (${machine})`,
+    background: '#0f172a',
+    color: '#f8fafc',
+    confirmButtonColor: '#10b981'
+  });
+
+  // เพิ่มข้อมูลใหม่เข้า Dashboard ทันที
+  rawWorkLogs.push(resData.data);
+  populateMachineFilterOptions();
+  renderDashboard();
+
         } else if (resData.isOverlapping) {
           const job = resData.activeJob || {};
           Swal.fire({

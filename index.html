@@ -929,18 +929,32 @@ function renderSessionRow(session, roundNum) {
     if (!startStr) return;
 
     try {
-      const parts = startStr.split(' ');
-      const dParts = parts[0].split('-');
-      const tParts = parts[1].split(':');
+      let startDate;
 
-      const startDate = new Date(
-        Number(dParts[0]),
-        Number(dParts[1]) - 1,
-        Number(dParts[2]),
-        Number(tParts[0]),
-        Number(tParts[1]),
-        Number(tParts[2])
-      );
+      // รองรับรูปแบบ yyyy-MM-dd HH:mm:ss
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(startStr)) {
+        const [datePart, timePart] = startStr.split(' ');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute, second] = timePart.split(':').map(Number);
+
+        startDate = new Date(
+          year,
+          month - 1,
+          day,
+          hour,
+          minute,
+          second
+        );
+
+      } else {
+        // รองรับ Date String เช่น
+        // Thu Sep 24 2026 10:37:11 GMT+0700
+        startDate = new Date(startStr);
+      }
+
+      if (isNaN(startDate.getTime())) {
+        throw new Error('Invalid start time');
+      }
 
       let diffSecs = Math.floor(
         (now.getTime() - startDate.getTime()) / 1000
@@ -960,7 +974,8 @@ function renderSessionRow(session, roundNum) {
       el.innerHTML =
         `<i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ${formatted}`;
 
-    } catch(e) {
+    } catch (e) {
+      console.error('Duration error:', startStr, e);
       el.innerText = '00:00:00';
     }
   });

@@ -453,6 +453,13 @@ function handleStartWork(params) {
   const existingMachine = String(data[i][3]).trim();
   const existingStatus = String(data[i][8]).trim();
 
+Logger.log(
+  'CHECK: EMP=' + existingEmp +
+  ' | WO=' + existingWorkOrder +
+  ' | MACHINE=' + existingMachine +
+  ' | STATUS=[' + existingStatus + ']'
+);
+
   // ห้าม EMP เดิมมีงานอื่นค้างอยู่
   if (existingEmp === empId && existingStatus === 'IN_PROGRESS') {
     return responseJSON({

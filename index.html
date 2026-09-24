@@ -1086,7 +1086,7 @@ function renderSessionRow(session, roundNum) {
                   <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-2 space-y-1 font-mono text-xs">
                     <div><span class="text-slate-400">WorkOrder ที่ค้างอยู่:</span> <span class="text-amber-300 font-bold">${escapeHtml(resData.activeJob.workOrder)}</span></div>
                     <div><span class="text-slate-400">Machine:</span> <span class="text-purple-300 font-bold">${escapeHtml(resData.activeJob.machine)}</span></div>
-                    <div><span class="text-slate-400">เวลาเริ่ม:</span> <span class="text-emerald-300">${escapeHtml(resData.activeJob.startTime)}</span></div>
+                    <div><span class="text-slate-400">เวลาเริ่ม:</span> <span class="text-emerald-300">${escapeHtml(formatAppDateTime(resData.activeJob.startTime))}</span></div>
                   </div>
                 ` : ''}
               </div>

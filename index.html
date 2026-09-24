@@ -870,27 +870,15 @@ function responseJSON(obj) {
 
             <!-- Sessions List (Rounds Table) -->
             <div class="overflow-x-auto">
-              <table class="w-full table-fixed border-collapse">
+              <table class="w-full text-left border-collapse">
                 <thead>
-  <tr class="text-[11px] font-semibold text-slate-400 tracking-wider border-b border-slate-800/60">
-    <th class="py-2 px-3 text-center align-middle w-[15%]">
-      รอบที่ (Round)
-    </th>
-    <th class="py-2 px-3 text-center align-middle w-[17%]">
-      เวลาเริ่ม (Start Time)
-    </th>
-    <th class="py-2 px-3 text-center align-middle w-[17%]">
-      เวลาจบ (End Time)
-    </th>
-    <th class="py-2 px-3 text-center align-middle w-[15%]">
-      ระยะเวลา (Duration)
-    </th>
-    <th class="py-2 px-3 text-center align-middle w-[18%]">
-      จำนวนชิ้นงาน (Quantity)
-    </th>
-    <th class="py-2 px-3 text-center align-middle w-[18%]">
-      การจัดการ (Action)
-    </th>
+  <tr class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">
+    <th class="py-2 px-3 text-left whitespace-nowrap">รอบที่ (Round)</th>
+    <th class="py-2 px-3 text-left whitespace-nowrap">เวลาเริ่ม (Start Time)</th>
+    <th class="py-2 px-3 text-left whitespace-nowrap">เวลาจบ (End Time)</th>
+    <th class="py-2 px-3 text-left whitespace-nowrap">ระยะเวลา (Duration)</th>
+    <th class="py-2 px-3 text-right whitespace-nowrap">จำนวนชิ้นงาน (Quantity)</th>
+    <th class="py-2 px-3 text-center whitespace-nowrap">การจัดการ (Action)</th>
   </tr>
 </thead>
                 <tbody class="divide-y divide-slate-800/40 text-xs">

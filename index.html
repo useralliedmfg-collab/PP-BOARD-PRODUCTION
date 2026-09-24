@@ -468,7 +468,7 @@ function handleStartWork(params) {
     });
   }
 
-  // ห้าม WO + Machine เดียวกัน มีงานที่กำลังดำเนินการอยู่
+  // เพิ่มอันนี้: WO + Machine เดิมมีงานค้าง
   if (
     existingWorkOrder === workOrder &&
     existingMachine === machine &&
@@ -487,6 +487,7 @@ function handleStartWork(params) {
       }
     });
   }
+
 }
 
   const newId = 'LOG-' + new Date().getTime();

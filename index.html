@@ -560,15 +560,45 @@ function getFormattedThaiTime(dateObj) {
   return Utilities.formatDate(dateObj, 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss');
 }
 
-function calculateDurationString(startTimeStr, endTimeStr) {
+function calculateDurationString(startTimeValue, endDate) {
   try {
-    if (!startTimeStr || !endTimeStr) return '00:00:00';
-    const startObj = parseDateStringBackend(startTimeStr);
-    const endObj = parseDateStringBackend(endTimeStr);
+    if (!startTimeValue || !endDate) {
+      return '00:00:00';
+    }
 
-    if (!startObj || !endObj) return '00:00:00';
+    let startDate;
 
-    let diffSecs = Math.floor((endObj.getTime() - startObj.getTime()) / 1000);
+    if (startTimeValue instanceof Date) {
+      startDate = startTimeValue;
+    } else {
+      const startTimeStr = String(startTimeValue).trim();
+
+      const match = startTimeStr.match(
+        /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/
+      );
+
+      if (!match) {
+        return '00:00:00';
+      }
+
+      startDate = new Date(
+        Number(match[1]),
+        Number(match[2]) - 1,
+        Number(match[3]),
+        Number(match[4]),
+        Number(match[5]),
+        Number(match[6])
+      );
+    }
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return '00:00:00';
+    }
+
+    let diffSecs = Math.floor(
+      (endDate.getTime() - startDate.getTime()) / 1000
+    );
+
     if (diffSecs < 0) diffSecs = 0;
 
     const hrs = Math.floor(diffSecs / 3600);
@@ -580,7 +610,9 @@ function calculateDurationString(startTimeStr, endTimeStr) {
       String(mins).padStart(2, '0') + ':' +
       String(secs).padStart(2, '0')
     );
+
   } catch (e) {
+    Logger.log('calculateDurationString ERROR: ' + e);
     return '00:00:00';
   }
 }

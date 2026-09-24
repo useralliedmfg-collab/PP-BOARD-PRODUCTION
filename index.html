@@ -385,7 +385,6 @@ function getSheet() {
   let sheet = ss.getSheetByName(TAB_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(TAB_NAME);
-    // Setup Headers
     sheet.appendRow(['ID', 'EMP_ID', 'WorkOrder', 'Machine', 'StartTime', 'EndTime', 'Quantity', 'Duration', 'Status']);
     sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#f3f4f6');
   }
@@ -393,19 +392,16 @@ function getSheet() {
 }
 
 function doGet(e) {
-  const action = e.parameter.action || 'getWorkLogs';
-  
+  const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'getWorkLogs';
   if (action === 'getWorkLogs') {
     return handleGetWorkLogs();
   }
-  
   return responseJSON({ status: 'error', message: 'Invalid GET action' });
 }
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
-    // Wait up to 10 seconds for lock to prevent overlap write
     if (!lock.waitLock(10000)) {
       return responseJSON({ status: 'error', message: 'ระบบกำลังประมวลผลคำสั่งอื่นอยู่ กรุณาลองใหม่อีกครั้ง' });
     }
@@ -418,7 +414,6 @@ function doPost(e) {
     }
 
     const action = contents.action;
-
     if (action === 'startWork') {
       return handleStartWork(contents);
     } else if (action === 'completeWork') {
@@ -441,7 +436,6 @@ function handleGetWorkLogs() {
     return responseJSON({ status: 'success', data: [] });
   }
 
-  const headers = data[0];
   const rows = data.slice(1);
   const result = rows.map(row => ({
     id: String(row[0]),
@@ -459,9 +453,9 @@ function handleGetWorkLogs() {
 }
 
 function handleStartWork(params) {
-  const empId = String(params.empId).trim();
-  const workOrder = String(params.workOrder).trim();
-  const machine = String(params.machine).trim();
+  const empId = String(params.empId || '').trim();
+  const workOrder = String(params.workOrder || '').trim();
+  const machine = String(params.machine || '').trim();
 
   if (!empId || empId.length !== 7 || isNaN(empId)) {
     return responseJSON({ status: 'error', message: 'EMP ID ต้องเป็นตัวเลข 7 หลักเท่านั้น' });
@@ -470,7 +464,6 @@ function handleStartWork(params) {
   const sheet = getSheet();
   const data = sheet.getDataRange().getValues();
 
-  // Rule 5: Backend Check - No overlapping active job for same EMP ID
   for (let i = 1; i < data.length; i++) {
     const existingEmp = String(data[i][1]).trim();
     const existingStatus = String(data[i][8]).trim();
@@ -489,7 +482,6 @@ function handleStartWork(params) {
     }
   }
 
-  // Create New Session Entry
   const newId = 'LOG-' + new Date().getTime();
   const startTimeStr = getFormattedThaiTime(new Date());
 
@@ -520,7 +512,7 @@ function handleStartWork(params) {
 }
 
 function handleCompleteWork(params) {
-  const logId = String(params.id).trim();
+  const logId = String(params.id || '').trim();
   const quantity = Number(params.quantity);
 
   if (isNaN(quantity) || quantity < 0) {
@@ -538,12 +530,12 @@ function handleCompleteWork(params) {
 
       const now = new Date();
       const endTimeStr = getFormattedThaiTime(now);
-      const startTimeStr = data[i][4];
-      const durationStr = calculateDurationString(startTimeStr, now);
+      const startTimeStr = String(data[i][4]);
+      const durationStr = calculateDurationString(startTimeStr, endTimeStr);
 
-      sheet.getRange(i + 1, 6).setValue(endTimeStr); // EndTime
-      sheet.getRange(i + 1, 7).setValue(quantity);   // Quantity
-      sheet.getRange(i + 1, 8).setValue(durationStr);// Duration
+      sheet.getRange(i + 1, 6).setValue(endTimeStr);  // EndTime
+      sheet.getRange(i + 1, 7).setValue(quantity);    // Quantity
+      sheet.getRange(i + 1, 8).setValue(durationStr); // Duration
       sheet.getRange(i + 1, 9).setValue('COMPLETED'); // Status
 
       return responseJSON({
@@ -564,51 +556,19 @@ function handleCompleteWork(params) {
 }
 
 function getFormattedThaiTime(dateObj) {
-  return Utilities.formatDate(
-    dateObj,
-    'Asia/Bangkok',
-    'yyyy-MM-dd HH:mm:ss'
-  );
+  if (!dateObj) dateObj = new Date();
+  return Utilities.formatDate(dateObj, 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss');
 }
 
-function calculateDurationString(startTimeStr, endDate) {
+function calculateDurationString(startTimeStr, endTimeStr) {
   try {
-    const parts = startTimeStr.split(' ');
-    const dParts = parts[0].split('-');
-    const tParts = parts[1].split(':');
+    if (!startTimeStr || !endTimeStr) return '00:00:00';
+    const startObj = parseDateStringBackend(startTimeStr);
+    const endObj = parseDateStringBackend(endTimeStr);
 
-    const startDate = new Date(
-      Number(dParts[0]),
-      Number(dParts[1]) - 1,
-      Number(dParts[2]),
-      Number(tParts[0]),
-      Number(tParts[1]),
-      Number(tParts[2])
-    );
+    if (!startObj || !endObj) return '00:00:00';
 
-    const endTimeStr = Utilities.formatDate(
-      endDate,
-      'Asia/Bangkok',
-      'yyyy-MM-dd HH:mm:ss'
-    );
-
-    const endParts = endTimeStr.split(' ');
-    const endDateParts = endParts[0].split('-');
-    const endTimeParts = endParts[1].split(':');
-
-    const endDateThai = new Date(
-      Number(endDateParts[0]),
-      Number(endDateParts[1]) - 1,
-      Number(endDateParts[2]),
-      Number(endTimeParts[0]),
-      Number(endTimeParts[1]),
-      Number(endTimeParts[2])
-    );
-
-    let diffSecs = Math.floor(
-      (endDateThai.getTime() - startDate.getTime()) / 1000
-    );
-
+    let diffSecs = Math.floor((endObj.getTime() - startObj.getTime()) / 1000);
     if (diffSecs < 0) diffSecs = 0;
 
     const hrs = Math.floor(diffSecs / 3600);
@@ -620,10 +580,27 @@ function calculateDurationString(startTimeStr, endDate) {
       String(mins).padStart(2, '0') + ':' +
       String(secs).padStart(2, '0')
     );
-
   } catch (e) {
     return '00:00:00';
   }
+}
+
+function parseDateStringBackend(str) {
+  if (!str) return null;
+  const s = String(str).trim();
+  const match = s.match(/^(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})[ T](\\d{1,2}):(\\d{1,2}):(\\d{1,2})/);
+  if (match) {
+    return new Date(
+      Number(match[1]),
+      Number(match[2]) - 1,
+      Number(match[3]),
+      Number(match[4]),
+      Number(match[5]),
+      Number(match[6])
+    );
+  }
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function responseJSON(obj) {
@@ -644,25 +621,25 @@ function responseJSON(obj) {
       fetchWorkLogs();
     };
 
-    // Live Clock Thailand
-function updateThaiClock() {
-  const now = new Date();
+    // Live Clock Thailand GMT+7
+    function updateThaiClock() {
+      const now = new Date();
 
-  const timeStr = now.toLocaleTimeString('th-TH', {
-    timeZone: 'Asia/Bangkok',
-    hour12: false
-  });
+      const timeStr = now.toLocaleTimeString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        hour12: false
+      });
 
-  const dateStr = now.toLocaleDateString('th-TH', {
-    timeZone: 'Asia/Bangkok',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+      const dateStr = now.toLocaleDateString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
 
-  document.getElementById('thaiClock').innerText =
-    `${dateStr} ${timeStr}`;
-}
+      document.getElementById('thaiClock').innerText = `${dateStr} ${timeStr}`;
+    }
+
     async function fetchWorkLogs() {
       const refreshIcon = document.getElementById('refreshIcon');
       refreshIcon.classList.add('fa-spin');
@@ -692,6 +669,64 @@ function updateThaiClock() {
       } finally {
         refreshIcon.classList.remove('fa-spin');
       }
+    }
+
+    function populateMachineFilterOptions() {
+      const select = document.getElementById('filterMachine');
+      if (!select) return;
+
+      const currentValue = select.value;
+      const defaultMachines = ['CDC1', 'CDC2', 'CDC3', 'CDC4', 'CNC-01', 'CNC-02', 'CNC-03', 'LASER-01', 'LASER-02', 'PRESS-01', 'PRESS-02'];
+      const loggedMachines = rawWorkLogs.map(item => item.machine).filter(Boolean);
+      const allUnique = Array.from(new Set([...defaultMachines, ...loggedMachines])).sort();
+
+      select.innerHTML = '<option value="">ทั้งหมดทุกเครื่อง</option>';
+      allUnique.forEach(mac => {
+        const opt = document.createElement('option');
+        opt.value = mac;
+        opt.textContent = mac;
+        select.appendChild(opt);
+      });
+
+      select.value = currentValue;
+    }
+
+    function updateTopStats(logs) {
+      let inProgressCount = 0;
+      let completedCount = 0;
+      const uniqueGroups = new Set();
+      const activeEmps = new Set();
+
+      logs.forEach(item => {
+        if (item.status === 'IN_PROGRESS') {
+          inProgressCount++;
+          activeEmps.add(item.empId);
+        } else if (item.status === 'COMPLETED') {
+          completedCount++;
+        }
+
+        if (item.empId && item.workOrder && item.machine) {
+          uniqueGroups.add(`${item.empId}_${item.workOrder}_${item.machine}`);
+        }
+      });
+
+      document.getElementById('statInProgress').innerText = inProgressCount;
+      document.getElementById('statCompleted').innerText = completedCount;
+      document.getElementById('statTotalGroups').innerText = uniqueGroups.size;
+      document.getElementById('statActiveEmps').innerText = activeEmps.size;
+    }
+
+    function applyFilters() {
+      renderDashboard();
+    }
+
+    function resetFilters() {
+      document.getElementById('filterEmpId').value = '';
+      document.getElementById('filterWorkOrder').value = '';
+      document.getElementById('filterMachine').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterDate').value = '';
+      renderDashboard();
     }
 
     function renderDashboard() {
@@ -728,15 +763,10 @@ function updateThaiClock() {
         return;
       }
 
-      /* CRITICAL REQUIREMENT 4:
-         Group by (EMP ID + WorkOrder + Machine).
-         If EMP ID, WorkOrder, Machine are identical -> Same Group Card.
-         If Machine changes -> Create NEW Group Card!
-      */
+      /* Group by (EMP ID + WorkOrder + Machine). */
       const groupsMap = {};
 
       filteredLogs.forEach(log => {
-        // Unique key for exact group matching
         const key = `${log.empId}_${log.workOrder}_${log.machine}`;
         if (!groupsMap[key]) {
           groupsMap[key] = {
@@ -754,7 +784,7 @@ function updateThaiClock() {
 
       let html = '';
 
-      groupKeys.forEach((key, index) => {
+      groupKeys.forEach((key) => {
         const group = groupsMap[key];
         
         // Sort sessions chronologically (Oldest round to Newest)
@@ -831,264 +861,178 @@ function updateThaiClock() {
       container.innerHTML = html;
     }
 
-    function formatAppDateTime(value) {
-  if (!value) return '-';
-
-  const date = new Date(value);
-
-  if (isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toLocaleString('th-TH-u-ca-gregory', {
-    timeZone: 'Asia/Bangkok',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-}
-
-    function formatDuration(value) {
-  if (value === null || value === undefined || value === '') {
-    return '00:00:00';
-  }
-
-  // ถ้าเป็น Date string ที่เกิดจาก Google Sheet เช่น
-  // Sat Dec 30 1899 01:30:00 ...
-  if (typeof value === 'string' && value.includes('1899')) {
-    const date = new Date(value);
-
-    if (!isNaN(date.getTime())) {
-      const hrs = date.getHours();
-      const mins = date.getMinutes();
-      const secs = date.getSeconds();
-
-      return (
-        String(hrs).padStart(2, '0') + ':' +
-        String(mins).padStart(2, '0') + ':' +
-        String(secs).padStart(2, '0')
-      );
-    }
-  }
-
-  // ถ้าเป็นรูปแบบ HH:mm:ss อยู่แล้ว
-  if (/^\d{1,3}:\d{2}:\d{2}$/.test(String(value))) {
-    const [h, m, s] = String(value).split(':').map(Number);
-
-    return (
-      String(h).padStart(2, '0') + ':' +
-      String(m).padStart(2, '0') + ':' +
-      String(s).padStart(2, '0')
-    );
-  }
-
-  return String(value);
-}
-
-function renderSessionRow(session, roundNum) {
-      const isRunning = session.status === 'IN_PROGRESS';
-
+    function renderSessionRow(sess, roundNum) {
+      const isCompleted = sess.status === 'COMPLETED';
+      
       return `
-        <tr class="${isRunning ? 'bg-emerald-950/20' : 'hover:bg-slate-800/30'} transition">
-          <!-- Round # -->
+        <tr class="hover:bg-slate-800/40 transition">
           <td class="py-3 px-3 font-medium text-slate-300">
-            <span class="bg-slate-800 px-2 py-1 rounded-lg border border-slate-700/60 font-mono">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
               รอบที่ ${roundNum}
             </span>
           </td>
-
-          <!-- Start Time -->
-          <td class="py-3 px-3 font-mono text-slate-300">
-            <div class="flex items-center gap-1.5">
-              <i class="fa-regular fa-clock text-emerald-400 text-[11px]"></i>
-              <span>${escapeHtml(formatAppDateTime(session.startTime))}</span>
-            </div>
-          </td>
-
-          <!-- End Time -->
-          <td class="py-3 px-3 font-mono text-slate-300">
-            ${isRunning 
-              ? `<span class="text-slate-500 italic">กำลังทำงาน...</span>`
-              : `<div class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-sky-400 text-[11px]"></i><span>${escapeHtml(formatAppDateTime(session.endTime))}</span></div>`
+          <td class="py-3 px-3 font-mono text-slate-300">${formatAppDateTime(sess.startTime)}</td>
+          <td class="py-3 px-3 font-mono text-slate-300">${isCompleted ? formatAppDateTime(sess.endTime) : '<span class="text-slate-500">--:--:--</span>'}</td>
+          <td class="py-3 px-3 font-mono">
+            ${isCompleted 
+              ? `<span class="text-sky-400 font-semibold">${formatDuration(sess.duration)}</span>`
+              : `<span id="active-duration-${sess.id}" data-starttime="${sess.startTime}" class="text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-stopwatch animate-pulse"></i> 00:00:00</span>`
             }
           </td>
-
-          <!-- Duration -->
-          <td class="py-3 px-3 font-mono font-medium">
-            ${isRunning 
-              ? `<span id="active-duration-${session.id}" data-starttime="${session.startTime}" class="text-emerald-400 flex items-center gap-1">
-                   <i class="fa-solid fa-stopwatch animate-pulse"></i>
-                   <span>คำนวณเวลา...</span>
-                 </span>`
-              : `<span class="text-slate-300">${escapeHtml(formatDuration(session.duration))}</span>`
+          <td class="py-3 px-3 text-right font-mono">
+            ${isCompleted 
+              ? `<span class="font-bold text-amber-300 text-sm">${Number(sess.quantity).toLocaleString('th-TH')} ชิ้น</span>`
+              : `<span class="text-slate-500">-</span>`
             }
           </td>
-
-          <!-- Quantity (NO AGGREGATION RULE: Distinct per session) -->
-          <td class="py-3 px-3 text-right">
-            ${isRunning 
-              ? `<div class="flex items-center justify-end gap-1">
-                   <input type="number" id="qty-input-${session.id}" min="0" placeholder="ระบุจำนวน..." 
-                          class="w-28 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-1 text-right text-emerald-300 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-emerald-400">
-                   <span class="text-slate-400 text-xs">ชิ้น</span>
-                 </div>`
-              : `<span class="font-mono font-bold text-sky-300 text-sm">${session.quantity !== '' ? Number(session.quantity).toLocaleString() : '0'}</span> <span class="text-slate-400 text-xs">ชิ้น</span>`
-            }
-          </td>
-
-          <!-- Action Status / Close Button -->
           <td class="py-3 px-3 text-center">
-            ${isRunning 
-              ? `<button onclick="handleCompleteWork('${session.id}')" 
-                         class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md transition flex items-center gap-1.5 mx-auto active:scale-95">
-                   <i class="fa-solid fa-flag-checkered"></i>
-                   <span>ปิดงาน</span>
+            ${isCompleted
+              ? `<span class="inline-flex items-center gap-1 text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg text-xs border border-sky-500/20"><i class="fa-solid fa-circle-check"></i> COMPLETED</span>`
+              : `<button onclick="completeWorkPrompt('${sess.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-3 py-1.5 rounded-xl shadow-lg shadow-emerald-900/30 text-xs inline-flex items-center gap-1.5 transition active:scale-95">
+                   <i class="fa-solid fa-flag-checkered"></i> <span>ปิดงาน</span>
                  </button>`
-              : `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
-                   <i class="fa-solid fa-check-double text-sky-400"></i> เสร็จสิ้น
-                 </span>`
             }
           </td>
         </tr>
       `;
     }
 
-    function updateActiveDurations() {
-  const activeElements = document.querySelectorAll('[id^="active-duration-"]');
-  const now = new Date();
+    async function completeWorkPrompt(id) {
+      const { value: quantity } = await Swal.fire({
+        title: 'ปิดงาน (Complete Work)',
+        text: 'กรุณากรอกจำนวนชิ้นงานที่ผลิตสำเร็จในรอบนี้',
+        input: 'number',
+        inputAttributes: {
+          min: 0,
+          step: 1,
+          placeholder: 'เช่น 1000'
+        },
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-check"></i> บันทึกปิดงาน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#475569',
+        background: '#0f172a',
+        color: '#f8fafc',
+        inputValidator: (value) => {
+          if (!value || isNaN(value) || Number(value) < 0) {
+            return 'กรุณากรอกจำนวนชิ้นงานให้ถูกต้อง (0 ขึ้นไป)';
+          }
+        }
+      });
 
-  activeElements.forEach(el => {
-    const startStr = el.getAttribute('data-starttime');
-    if (!startStr) return;
-
-    try {
-      let startDate;
-
-      // รองรับรูปแบบ yyyy-MM-dd HH:mm:ss
-      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(startStr)) {
-        const [datePart, timePart] = startStr.split(' ');
-        const [year, month, day] = datePart.split('-').map(Number);
-        const [hour, minute, second] = timePart.split(':').map(Number);
-
-        startDate = new Date(
-          year,
-          month - 1,
-          day,
-          hour,
-          minute,
-          second
-        );
-
-      } else {
-        // รองรับ Date String เช่น
-        // Thu Sep 24 2026 10:37:11 GMT+0700
-        startDate = new Date(startStr);
+      if (quantity !== undefined && quantity !== null) {
+        submitCompleteWork(id, Number(quantity));
       }
-
-      if (isNaN(startDate.getTime())) {
-        throw new Error('Invalid start time');
-      }
-
-      let diffSecs = Math.floor(
-        (now.getTime() - startDate.getTime()) / 1000
-      );
-
-      if (diffSecs < 0) diffSecs = 0;
-
-      const hrs = Math.floor(diffSecs / 3600);
-      const mins = Math.floor((diffSecs % 3600) / 60);
-      const secs = diffSecs % 60;
-
-      const formatted =
-        `${String(hrs).padStart(2, '0')}:` +
-        `${String(mins).padStart(2, '0')}:` +
-        `${String(secs).padStart(2, '0')}`;
-
-      el.innerHTML =
-        `<i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ${formatted}`;
-
-    } catch (e) {
-      console.error('Duration error:', startStr, e);
-      el.innerText = '00:00:00';
     }
-  });
-}
+
+    async function submitCompleteWork(id, quantity) {
+      Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        text: 'โปรดรอสักครู่ ระบบกำลังคำนวณและบันทึกข้อมูลลง Google Sheet',
+        allowOutsideClick: false,
+        background: '#0f172a',
+        color: '#f8fafc',
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      try {
+        const response = await fetch(GAS_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'completeWork',
+            id: id,
+            quantity: quantity
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'ปิดงานสำเร็จ!',
+            text: `บันทึกระยะเวลา (${result.data.duration}) และจำนวนชิ้นงาน (${Number(quantity).toLocaleString('th-TH')} ชิ้น) เรียบร้อยแล้ว`,
+            background: '#0f172a',
+            color: '#f8fafc',
+            confirmButtonColor: '#0284c7'
+          });
+          fetchWorkLogs();
+        } else {
+          showErrorToast(result.message || 'เกิดข้อผิดพลาดในการปิดงาน');
+        }
+      } catch (err) {
+        console.error('Error submitting complete work:', err);
+        showErrorToast('ไม่สามารถเชื่อมต่อกับระบบ Backend ได้');
+      }
+    }
 
     async function handleStartWorkSubmit(e) {
       e.preventDefault();
 
       const empId = document.getElementById('inputEmpId').value.trim();
-      const workOrder = document.getElementById('inputWorkOrder').value.trim();
-      let machine = document.getElementById('inputMachineSelect').value;
+      const workOrder = document.getElementById('inputWorkOrder').value.trim().toUpperCase();
+      const machineSelect = document.getElementById('inputMachineSelect').value;
+      const customMachine = document.getElementById('inputCustomMachine').value.trim();
 
-      if (machine === 'CUSTOM') {
-        machine = document.getElementById('inputCustomMachine').value.trim();
-      }
+      const machine = machineSelect === 'CUSTOM' ? customMachine : machineSelect;
 
       if (!empId || empId.length !== 7 || isNaN(empId)) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'ข้อมูลไม่ถูกต้อง',
-          text: 'กรุณากรอก EMP ID เป็นตัวเลข 7 หลักเท่านั้น',
-          background: '#0f172a',
-          color: '#f8fafc',
-          confirmButtonColor: '#0284c7'
-        });
+        showErrorToast('EMP ID ต้องเป็นรหัสพนักงานตัวเลข 7 หลัก');
         return;
       }
 
-      if (!workOrder || !machine) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'ข้อมูลไม่ครบถ้วน',
-          text: 'กรุณากรอก WorkOrder และระบุ Machine',
-          background: '#0f172a',
-          color: '#f8fafc',
-          confirmButtonColor: '#0284c7'
-        });
+      if (!workOrder) {
+        showErrorToast('กรุณาระบุ WorkOrder');
         return;
       }
 
-      /* CRITICAL REQUIREMENT 5 (Frontend Pre-Check):
-         Check if the same EMP ID already has an IN_PROGRESS job
-      */
-      const existingActive = rawWorkLogs.find(item => item.empId === empId && item.status === 'IN_PROGRESS');
-      if (existingActive) {
+      if (!machine) {
+        showErrorToast('กรุณาระบุ Machine');
+        return;
+      }
+
+      // Check for active IN_PROGRESS job on same EMP ID
+      const activeJob = rawWorkLogs.find(log => log.empId === empId && log.status === 'IN_PROGRESS');
+      if (activeJob) {
         Swal.fire({
-          icon: 'error',
+          icon: 'warning',
           title: 'ไม่สามารถเริ่มงานใหม่ได้',
           html: `
-            <div class="text-left space-y-2 text-sm text-slate-300">
-              <p class="text-rose-400 font-semibold">รหัสพนักงานนี้มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน จึงจะสามารถเริ่มงานรอบถัดไปได้</p>
-              <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-2 space-y-1 font-mono text-xs">
-                <div><span class="text-slate-400">EMP ID:</span> <span class="text-white font-bold">${escapeHtml(empId)}</span></div>
-                <div><span class="text-slate-400">WorkOrder ที่ค้างอยู่:</span> <span class="text-amber-300 font-bold">${escapeHtml(existingActive.workOrder)}</span></div>
-                <div><span class="text-slate-400">Machine:</span> <span class="text-purple-300 font-bold">${escapeHtml(existingActive.machine)}</span></div>
-                <div><span class="text-slate-400">เวลาเริ่ม:</span> <span class="text-emerald-300">${escapeHtml(existingActive.startTime)}</span></div>
-              </div>
+            <p class="text-slate-300 mb-3">รหัสพนักงานนี้ <strong>(${empId})</strong> มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน จึงจะสามารถเริ่มงานรอบถัดไปได้</p>
+            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-left text-xs font-mono space-y-1 text-amber-300">
+              <div><i class="fa-solid fa-file-invoice"></i> WO: <strong>${escapeHtml(activeJob.workOrder)}</strong></div>
+              <div><i class="fa-solid fa-industry"></i> Machine: <strong>${escapeHtml(activeJob.machine)}</strong></div>
+              <div><i class="fa-regular fa-clock"></i> เริ่มงานเมื่อ: <strong>${escapeHtml(activeJob.startTime)}</strong></div>
             </div>
           `,
           background: '#0f172a',
           color: '#f8fafc',
-          confirmButtonColor: '#e11d48',
-          confirmButtonText: 'เข้าใจแล้ว'
+          confirmButtonColor: '#0284c7',
+          confirmButtonText: 'รับทราบ'
         });
         return;
       }
 
-      // Submit to Backend
-      const btn = document.getElementById('btnSubmitStartWork');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+      Swal.fire({
+        title: 'กำลังเริ่มบันทึกงาน...',
+        allowOutsideClick: false,
+        background: '#0f172a',
+        color: '#f8fafc',
+        didOpen: () => Swal.showLoading()
+      });
 
       try {
         const response = await fetch(GAS_ENDPOINT, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
           body: JSON.stringify({
             action: 'startWork',
             empId: empId,
@@ -1100,152 +1044,56 @@ function renderSessionRow(session, roundNum) {
         const resData = await response.json();
 
         if (resData.status === 'success') {
+          closeAddWorkModal();
           Swal.fire({
             icon: 'success',
             title: 'เริ่มงานสำเร็จ!',
-            text: `บันทึกเวลาเริ่มงานสำหรับ EMP ${empId} เรียบร้อยแล้ว`,
+            text: `เริ่มต้นบันทึกเวลาสำหรับ WO: ${workOrder} (${machine})`,
             background: '#0f172a',
             color: '#f8fafc',
-            confirmButtonColor: '#10b981',
-            timer: 2000
+            confirmButtonColor: '#10b981'
           });
-          closeAddWorkModal();
           fetchWorkLogs();
         } else if (resData.isOverlapping) {
-          // Backend Rule 5 Overlap Validation triggered
+          const job = resData.activeJob || {};
           Swal.fire({
-            icon: 'error',
+            icon: 'warning',
             title: resData.title || 'ไม่สามารถเริ่มงานใหม่ได้',
             html: `
-              <div class="text-left space-y-2 text-sm text-slate-300">
-                <p class="text-rose-400 font-semibold">${resData.message}</p>
-                ${resData.activeJob ? `
-                  <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-2 space-y-1 font-mono text-xs">
-                    <div><span class="text-slate-400">WorkOrder ที่ค้างอยู่:</span> <span class="text-amber-300 font-bold">${escapeHtml(resData.activeJob.workOrder)}</span></div>
-                    <div><span class="text-slate-400">Machine:</span> <span class="text-purple-300 font-bold">${escapeHtml(resData.activeJob.machine)}</span></div>
-                    <div><span class="text-slate-400">เวลาเริ่ม:</span> <span class="text-emerald-300">${escapeHtml(formatAppDateTime(resData.activeJob.startTime))}</span></div>
-                  </div>
-                ` : ''}
-              </div>
+              <p class="text-slate-300 mb-3">${escapeHtml(resData.message)}</p>
+              ${job.workOrder ? `
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-left text-xs font-mono space-y-1 text-amber-300">
+                  <div><i class="fa-solid fa-file-invoice"></i> WO: <strong>${escapeHtml(job.workOrder)}</strong></div>
+                  <div><i class="fa-solid fa-industry"></i> Machine: <strong>${escapeHtml(job.machine)}</strong></div>
+                  <div><i class="fa-regular fa-clock"></i> เริ่มงานเมื่อ: <strong>${escapeHtml(job.startTime)}</strong></div>
+                </div>
+              ` : ''}
             `,
             background: '#0f172a',
             color: '#f8fafc',
-            confirmButtonColor: '#e11d48'
+            confirmButtonColor: '#0284c7'
           });
         } else {
-          showErrorToast(resData.message);
+          showErrorToast(resData.message || 'ไม่สามารถเพิ่มงานได้');
         }
+
       } catch (err) {
-        showErrorToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-play"></i><span>เริ่มงานทันที (Start Work)</span>';
+        console.error('Start work error:', err);
+        showErrorToast('ไม่สามารถเชื่อมต่อกับระบบ Backend ได้');
       }
     }
 
-    async function handleCompleteWork(logId) {
-      const qtyInput = document.getElementById(`qty-input-${logId}`);
-      if (!qtyInput) return;
-
-      const qtyVal = qtyInput.value.trim();
-
-      if (qtyVal === '' || isNaN(qtyVal) || Number(qtyVal) < 0) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'กรุณาระบุจำนวนชิ้นงาน',
-          text: 'ป้อนจำนวนชิ้นงานที่ผลิตได้ในรอบนี้ (เช่น 1000)',
-          background: '#0f172a',
-          color: '#f8fafc',
-          confirmButtonColor: '#f59e0b'
-        });
-        qtyInput.focus();
-        return;
-      }
-
-      const formattedQty = Number(qtyVal).toLocaleString();
-
-      const confirmResult = await Swal.fire({
-        title: 'ยืนยันการปิดงาน?',
-        html: `จำนวนชิ้นงานในรอบนี้: <b class="text-emerald-400 text-lg font-mono">${formattedQty} ชิ้น</b>`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: 'ยืนยันปิดงาน',
-        cancelButtonText: 'ยกเลิก',
-        background: '#0f172a',
-        color: '#f8fafc'
-      });
-
-      if (!confirmResult.isConfirmed) return;
-
-      try {
-        Swal.fire({
-          title: 'กำลังบันทึกปิดงาน...',
-          text: 'กรุณารอสักครู่',
-          allowOutsideClick: false,
-          didOpen: () => Swal.showLoading(),
-          background: '#0f172a',
-          color: '#f8fafc'
-        });
-
-        const response = await fetch(GAS_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'completeWork',
-            id: logId,
-            quantity: Number(qtyVal)
-          })
-        });
-
-        const resData = await response.json();
-
-        if (resData.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'ปิดงานเรียบร้อย!',
-            text: `บันทึก ${formattedQty} ชิ้น สรุปเวลาเรียบร้อยแล้ว`,
-            background: '#0f172a',
-            color: '#f8fafc',
-            confirmButtonColor: '#10b981',
-            timer: 2000
-          });
-          fetchWorkLogs();
-        } else {
-          showErrorToast(resData.message);
-        }
-      } catch (err) {
-        showErrorToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-      }
+    function openAddWorkModal() {
+      document.getElementById('addWorkForm').reset();
+      document.getElementById('inputCustomMachine').classList.add('hidden');
+      document.getElementById('inputCustomMachine').required = false;
+      document.getElementById('addWorkModal').classList.remove('hidden');
+      document.getElementById('addWorkModal').classList.add('flex');
     }
 
-    function updateTopStats(logs) {
-      const inProgress = logs.filter(l => l.status === 'IN_PROGRESS').length;
-      const completed = logs.filter(l => l.status === 'COMPLETED').length;
-      
-      const uniqueEmps = new Set(logs.map(l => l.empId)).size;
-      const uniqueGroups = new Set(logs.map(l => `${l.empId}_${l.workOrder}_${l.machine}`)).size;
-
-      document.getElementById('statInProgress').innerText = inProgress;
-      document.getElementById('statCompleted').innerText = completed;
-      document.getElementById('statTotalGroups').innerText = uniqueGroups;
-      document.getElementById('statActiveEmps').innerText = uniqueEmps;
-    }
-
-    function populateMachineFilterOptions() {
-      const select = document.getElementById('filterMachine');
-      const currentVal = select.value;
-      
-      const machines = new Set(rawWorkLogs.map(l => l.machine).filter(Boolean));
-      
-      let html = '<option value="">ทั้งหมดทุกเครื่อง</option>';
-      machines.forEach(m => {
-        html += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`;
-      });
-      
-      select.innerHTML = html;
-      select.value = currentVal;
+    function closeAddWorkModal() {
+      document.getElementById('addWorkModal').classList.add('hidden');
+      document.getElementById('addWorkModal').classList.remove('flex');
     }
 
     function toggleCustomMachineInput() {
@@ -1259,31 +1107,6 @@ function renderSessionRow(session, roundNum) {
         customInput.classList.add('hidden');
         customInput.required = false;
       }
-    }
-
-    function applyFilters() {
-      renderDashboard();
-    }
-
-    function resetFilters() {
-      document.getElementById('filterEmpId').value = '';
-      document.getElementById('filterWorkOrder').value = '';
-      document.getElementById('filterMachine').value = '';
-      document.getElementById('filterStatus').value = '';
-      document.getElementById('filterDate').value = '';
-      renderDashboard();
-    }
-
-    function openAddWorkModal() {
-      document.getElementById('addWorkForm').reset();
-      toggleCustomMachineInput();
-      document.getElementById('addWorkModal').classList.remove('hidden');
-      document.getElementById('addWorkModal').classList.add('flex');
-    }
-
-    function closeAddWorkModal() {
-      document.getElementById('addWorkModal').classList.add('hidden');
-      document.getElementById('addWorkModal').classList.remove('flex');
     }
 
     function openGasCodeModal() {
@@ -1304,12 +1127,119 @@ function renderSessionRow(session, roundNum) {
       
       Swal.fire({
         icon: 'success',
-        title: 'คัดลอก Code แล้ว!',
-        text: 'นำไปวางใน Google Apps Script Editor แล้วสั่ง Deploy ได้ทันที',
+        title: 'คัดลอกโค้ดสำเร็จ!',
+        text: 'นำโค้ดไปวางใน Google Apps Script Editor ได้ทันที',
+        timer: 2000,
+        showConfirmButton: false,
         background: '#0f172a',
-        color: '#f8fafc',
-        confirmButtonColor: '#10b981',
-        timer: 2000
+        color: '#f8fafc'
+      });
+    }
+
+    function formatAppDateTime(value) {
+      if (!value) return '-';
+      const date = parseAppDateString(value);
+      if (!date) return String(value);
+
+      return date.toLocaleString('th-TH-u-ca-gregory', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    }
+
+    function formatDuration(value) {
+      if (value === null || value === undefined || value === '') {
+        return '00:00:00';
+      }
+
+      if (typeof value === 'string' && value.includes('1899')) {
+        const date = new Date(value);
+
+        if (!isNaN(date.getTime())) {
+          const hrs = date.getHours();
+          const mins = date.getMinutes();
+          const secs = date.getSeconds();
+
+          return (
+            String(hrs).padStart(2, '0') + ':' +
+            String(mins).padStart(2, '0') + ':' +
+            String(secs).padStart(2, '0')
+          );
+        }
+      }
+
+      if (/^\d{1,3}:\d{2}:\d{2}$/.test(String(value))) {
+        const [h, m, s] = String(value).split(':').map(Number);
+
+        return (
+          String(h).padStart(2, '0') + ':' +
+          String(m).padStart(2, '0') + ':' +
+          String(s).padStart(2, '0')
+        );
+      }
+
+      return String(value);
+    }
+
+    function parseAppDateString(str) {
+      if (!str) return null;
+      const s = String(str).trim();
+      const match = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{1,2}):(\d{1,2})/);
+      if (match) {
+        return new Date(
+          Number(match[1]),
+          Number(match[2]) - 1,
+          Number(match[3]),
+          Number(match[4]),
+          Number(match[5]),
+          Number(match[6])
+        );
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function updateActiveDurations() {
+      const activeElements = document.querySelectorAll('[id^="active-duration-"]');
+      const now = new Date();
+
+      const nowThaiDateStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+      const nowThaiTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' });
+      const endDate = parseAppDateString(`${nowThaiDateStr} ${nowThaiTimeStr}`);
+
+      activeElements.forEach(el => {
+        const startStr = el.getAttribute('data-starttime');
+        if (!startStr) return;
+
+        try {
+          const startDate = parseAppDateString(startStr);
+          if (!startDate || !endDate) return;
+
+          let diffSecs = Math.floor((endDate.getTime() - startDate.getTime()) / 1000);
+          if (diffSecs < 0) diffSecs = 0;
+
+          const hrs = Math.floor(diffSecs / 3600);
+          const mins = Math.floor((diffSecs % 3600) / 60);
+          const secs = diffSecs % 60;
+
+          const formatted =
+            `${String(hrs).padStart(2, '0')}:` +
+            `${String(mins).padStart(2, '0')}:` +
+            `${String(secs).padStart(2, '0')}`;
+
+          el.innerHTML =
+            `<i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ${formatted}`;
+
+        } catch (e) {
+          console.error('Duration error:', startStr, e);
+          el.innerText = '00:00:00';
+        }
       });
     }
 

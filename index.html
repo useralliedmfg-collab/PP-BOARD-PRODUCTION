@@ -460,41 +460,31 @@ Logger.log(
   ' | STATUS=[' + existingStatus + ']'
 );
 
-  // ห้าม EMP เดิมมีงานอื่นค้างอยู่
-  if (existingEmp === empId && existingStatus === 'IN_PROGRESS') {
-    return responseJSON({
-      status: 'error',
-      isOverlapping: true,
-      title: 'ไม่สามารถเริ่มงานใหม่ได้',
-      message: 'รหัสพนักงานนี้มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน จึงจะสามารถเริ่มงานรอบถัดไปได้',
-      activeJob: {
-        workOrder: String(data[i][2]),
-        machine: String(data[i][3]),
-        startTime: String(data[i][4])
-      }
-    });
-  }
-
-  // เพิ่มอันนี้: WO + Machine เดิมมีงานค้าง
-  if (
-    existingWorkOrder === workOrder &&
-    existingMachine === machine &&
-    existingStatus === 'IN_PROGRESS'
-  ) {
-    return responseJSON({
-      status: 'error',
-      isOverlapping: true,
-      title: 'ไม่สามารถเริ่มงานซ้ำได้',
-      message: 'WO ' + workOrder + ' ที่เครื่อง ' + machine + ' กำลังดำเนินการอยู่ กรุณาปิดงานรอบปัจจุบันก่อน',
-      activeJob: {
-        workOrder: String(data[i][2]),
-        machine: String(data[i][3]),
-        startTime: String(data[i][4]),
-        empId: String(data[i][1])
-      }
-    });
-  }
-
+// ห้าม EMP เดิมมีงานค้าง
+// และห้าม WO + Machine เดิมมีงานค้าง
+if (
+  existingStatus === 'IN_PROGRESS' &&
+  (
+    existingEmp === empId ||
+    (
+      existingWorkOrder === workOrder &&
+      existingMachine === machine
+    )
+  )
+) {
+  return responseJSON({
+    status: 'error',
+    isOverlapping: true,
+    title: 'ไม่สามารถเริ่มงานใหม่ได้',
+    message: 'มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน',
+    activeJob: {
+      workOrder: String(data[i][2]),
+      machine: String(data[i][3]),
+      startTime: String(data[i][4]),
+      empId: String(data[i][1])
+    }
+  });
+}
 }
 
   const newId = 'LOG-' + new Date().getTime();

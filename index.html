@@ -103,7 +103,7 @@
         <div class="flex items-center gap-2 sm:gap-3">
           <button onclick="openAddWorkModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-4 py-2 rounded-xl shadow-lg shadow-emerald-900/30 transition flex items-center gap-2 active:scale-95 text-sm sm:text-base">
             <i class="fa-solid fa-plus text-base"></i>
-            <span>+ เพิ่มงาน</span>
+            <span>เพิ่มงาน</span>
           </button>
           
           <button onclick="fetchWorkLogs()" title="รีเฟรชข้อมูล" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl border border-slate-700 transition">
@@ -285,31 +285,14 @@
           </label>
           <div class="space-y-2">
             <select id="inputMachineSelect" onchange="toggleCustomMachineInput()" required
-                    class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-              <option value="" disabled selected>-- เลือกเครื่องจักร --</option>
-              <optgroup label="CDC Category">
-                <option value="CDC1">CDC1</option>
-                <option value="CDC2">CDC2</option>
-                <option value="CDC3">CDC3</option>
-                <option value="CDC4">CDC4</option>
-              </optgroup>
-              <optgroup label="CNC Category">
-                <option value="CNC-01">CNC-01</option>
-                <option value="CNC-02">CNC-02</option>
-                <option value="CNC-03">CNC-03</option>
-              </optgroup>
-              <optgroup label="LASER Category">
-                <option value="LASER-01">LASER-01</option>
-                <option value="LASER-02">LASER-02</option>
-              </optgroup>
-              <optgroup label="PRESS Category">
-                <option value="PRESS-01">PRESS-01</option>
-                <option value="PRESS-02">PRESS-02</option>
-              </optgroup>
-              <optgroup label="OTHER / เพิ่มเครื่องจักรใหม่">
-                <option value="CUSTOM">+ ระบุชื่อเครื่องจักรใหม่...</option>
-              </optgroup>
-            </select>
+        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+  <option value="" disabled selected>-- เลือกเครื่องจักร --</option>
+
+  <optgroup label="Production Machine">
+    <option value="P13-A">P13-A</option>
+    <option value="P13-B">P13-B</option>
+  </optgroup>
+</select>
 
             <!-- Custom Machine Input (If selected CUSTOM) -->
             <input type="text" id="inputCustomMachine" placeholder="ระบุชื่อเครื่องจักรใหม่ (เช่น BEND1)..." 
@@ -732,7 +715,7 @@ function responseJSON(obj) {
       if (!select) return;
 
       const currentValue = select.value;
-      const defaultMachines = ['CDC1', 'CDC2', 'CDC3', 'CDC4', 'CNC-01', 'CNC-02', 'CNC-03', 'LASER-01', 'LASER-02', 'PRESS-01', 'PRESS-02'];
+      const defaultMachines = ['P13-A', 'P13-B'];
       const loggedMachines = rawWorkLogs.map(item => item.machine).filter(Boolean);
       const allUnique = Array.from(new Set([...defaultMachines, ...loggedMachines])).sort();
 

@@ -1008,6 +1008,7 @@ function responseJSON(obj) {
         });
 
         const result = await response.json();
+        console.log('COMPLETE RESULT:', result);
 
         if (result.status === 'success') {
           Swal.fire({

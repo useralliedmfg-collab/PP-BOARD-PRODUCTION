@@ -852,6 +852,43 @@ function updateThaiClock() {
   });
 }
 
+    function formatDuration(value) {
+  if (value === null || value === undefined || value === '') {
+    return '00:00:00';
+  }
+
+  // ถ้าเป็น Date string ที่เกิดจาก Google Sheet เช่น
+  // Sat Dec 30 1899 01:30:00 ...
+  if (typeof value === 'string' && value.includes('1899')) {
+    const date = new Date(value);
+
+    if (!isNaN(date.getTime())) {
+      const hrs = date.getHours();
+      const mins = date.getMinutes();
+      const secs = date.getSeconds();
+
+      return (
+        String(hrs).padStart(2, '0') + ':' +
+        String(mins).padStart(2, '0') + ':' +
+        String(secs).padStart(2, '0')
+      );
+    }
+  }
+
+  // ถ้าเป็นรูปแบบ HH:mm:ss อยู่แล้ว
+  if (/^\d{1,3}:\d{2}:\d{2}$/.test(String(value))) {
+    const [h, m, s] = String(value).split(':').map(Number);
+
+    return (
+      String(h).padStart(2, '0') + ':' +
+      String(m).padStart(2, '0') + ':' +
+      String(s).padStart(2, '0')
+    );
+  }
+
+  return String(value);
+}
+
 function renderSessionRow(session, roundNum) {
       const isRunning = session.status === 'IN_PROGRESS';
 
@@ -887,7 +924,7 @@ function renderSessionRow(session, roundNum) {
                    <i class="fa-solid fa-stopwatch animate-pulse"></i>
                    <span>คำนวณเวลา...</span>
                  </span>`
-              : `<span class="text-slate-300">${escapeHtml(session.duration || '-')}</span>`
+              : `<span class="text-slate-300">${escapeHtml(formatDuration(session.duration))}</span>`
             }
           </td>
 

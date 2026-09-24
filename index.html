@@ -60,6 +60,147 @@
     .glow-progress {
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
     }
+
+    /* =========================================
+   PP BOARD - PREMIUM LIGHT BLUE THEME
+   Visual Only — No Logic / JS / GAS Changes
+   ========================================= */
+
+html {
+  background: #eaf6fc !important;
+}
+
+body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(186, 230, 253, 0.55), transparent 32%),
+    radial-gradient(circle at 90% 10%, rgba(224, 242, 254, 0.8), transparent 30%),
+    linear-gradient(135deg, #edf8fd 0%, #e4f3fa 50%, #eef8fc 100%) !important;
+  color: #1e293b !important;
+}
+
+/* Header */
+header {
+  background: rgba(248, 252, 255, 0.92) !important;
+  border-color: #d5e8f3 !important;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.08) !important;
+}
+
+/* Header separator */
+header .border-slate-800\/80 {
+  border-color: #dcecf5 !important;
+}
+
+/* Clock */
+header .bg-slate-800\/80 {
+  background: rgba(235, 247, 253, 0.9) !important;
+  border-color: #cfe4ef !important;
+}
+
+header .text-slate-200 {
+  color: #334155 !important;
+}
+
+/* Stats Cards */
+main .bg-slate-900\/90 {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-color: #d5e8f3 !important;
+  box-shadow:
+    0 8px 25px rgba(71, 85, 105, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Stats labels */
+main .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Filters */
+main > .bg-slate-900 {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-color: #d5e8f3 !important;
+  box-shadow: 0 8px 25px rgba(71, 85, 105, 0.06) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Inputs / Selects */
+main input,
+main select {
+  background: #edf7fc !important;
+  border-color: #cfe3ee !important;
+  color: #334155 !important;
+}
+
+main input::placeholder {
+  color: #94a3b8 !important;
+}
+
+main input:focus,
+main select:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+}
+
+/* Section title */
+main h2 {
+  color: #1e293b !important;
+}
+
+/* Group Cards */
+#dashboardCardsContainer > div {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: #d5e8f3 !important;
+  box-shadow:
+    0 10px 30px rgba(71, 85, 105, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Group Card inner badges */
+#dashboardCardsContainer .bg-slate-800 {
+  background: #eaf5fa !important;
+  border-color: #cfe3ee !important;
+}
+
+/* Group Card separators */
+#dashboardCardsContainer .border-slate-800\/80,
+#dashboardCardsContainer .border-slate-800\/60 {
+  border-color: #dceaf2 !important;
+}
+
+/* Table text */
+#dashboardCardsContainer .text-slate-300 {
+  color: #334155 !important;
+}
+
+#dashboardCardsContainer .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Group count */
+#groupCountBadge {
+  background: #e8f4fa !important;
+  border-color: #cfe3ee !important;
+  color: #475569 !important;
+}
+
+/* Table hover */
+#dashboardCardsContainer tr:hover {
+  background: rgba(186, 230, 253, 0.18) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar-track {
+  background: #e1eff6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a9c9d9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7fb4c9;
+}
   </style>
 </head>
 <body class="h-full bg-slate-950 text-slate-100 flex flex-col min-h-screen">
@@ -130,7 +271,7 @@
           <h3 id="statInProgress" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
         </div>
         <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-          <i class="fa-solid fa-spinner"></i>
+          <i class="fa-solid fa-play text-sm"></i>
         </div>
       </div>
 
@@ -1151,8 +1292,8 @@ if (log) {
 
   // เพิ่มข้อมูลใหม่เข้า Dashboard ทันที
   rawWorkLogs.push(resData.data);
-  populateMachineFilterOptions();
-  renderDashboard();
+populateMachineFilterOptions();
+renderDashboard();
 
         } else if (resData.isOverlapping) {
           const job = resData.activeJob || {};

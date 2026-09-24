@@ -564,18 +564,11 @@ function handleCompleteWork(params) {
 }
 
 function getFormattedThaiTime(dateObj) {
-  // GMT+7 Thailand Formatting: YYYY-MM-DD HH:mm:ss
-  const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
-  const thaiDate = new Date(utc + (3600000 * 7));
-  
-  const y = thaiDate.getFullYear();
-  const m = String(thaiDate.getMonth() + 1).padStart(2, '0');
-  const d = String(thaiDate.getDate()).padStart(2, '0');
-  const hh = String(thaiDate.getHours()).padStart(2, '0');
-  const mm = String(thaiDate.getMinutes()).padStart(2, '0');
-  const ss = String(thaiDate.getSeconds()).padStart(2, '0');
-
-  return y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss;
+  return Utilities.formatDate(
+    dateObj,
+    'Asia/Bangkok',
+    'yyyy-MM-dd HH:mm:ss'
+  );
 }
 
 function calculateDurationString(startTimeStr, endDate) {
@@ -583,20 +576,52 @@ function calculateDurationString(startTimeStr, endDate) {
     const parts = startTimeStr.split(' ');
     const dParts = parts[0].split('-');
     const tParts = parts[1].split(':');
-    const startDate = new Date(dParts[0], dParts[1] - 1, dParts[2], tParts[0], tParts[1], tParts[2]);
 
-    const utcEnd = endDate.getTime() + (endDate.getTimezoneOffset() * 60000);
-    const thaiEndDate = new Date(utcEnd + (3600000 * 7));
+    const startDate = new Date(
+      Number(dParts[0]),
+      Number(dParts[1]) - 1,
+      Number(dParts[2]),
+      Number(tParts[0]),
+      Number(tParts[1]),
+      Number(tParts[2])
+    );
 
-    let diffSecs = Math.floor((thaiEndDate.getTime() - startDate.getTime()) / 1000);
+    const endTimeStr = Utilities.formatDate(
+      endDate,
+      'Asia/Bangkok',
+      'yyyy-MM-dd HH:mm:ss'
+    );
+
+    const endParts = endTimeStr.split(' ');
+    const endDateParts = endParts[0].split('-');
+    const endTimeParts = endParts[1].split(':');
+
+    const endDateThai = new Date(
+      Number(endDateParts[0]),
+      Number(endDateParts[1]) - 1,
+      Number(endDateParts[2]),
+      Number(endTimeParts[0]),
+      Number(endTimeParts[1]),
+      Number(endTimeParts[2])
+    );
+
+    let diffSecs = Math.floor(
+      (endDateThai.getTime() - startDate.getTime()) / 1000
+    );
+
     if (diffSecs < 0) diffSecs = 0;
 
     const hrs = Math.floor(diffSecs / 3600);
     const mins = Math.floor((diffSecs % 3600) / 60);
     const secs = diffSecs % 60;
 
-    return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-  } catch(e) {
+    return (
+      String(hrs).padStart(2, '0') + ':' +
+      String(mins).padStart(2, '0') + ':' +
+      String(secs).padStart(2, '0')
+    );
+
+  } catch (e) {
     return '00:00:00';
   }
 }
@@ -619,18 +644,25 @@ function responseJSON(obj) {
       fetchWorkLogs();
     };
 
-    // Live Clock GMT+7
-    function updateThaiClock() {
-      const now = new Date();
-      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const thaiTime = new Date(utc + (3600000 * 7));
-      
-      const timeStr = thaiTime.toLocaleTimeString('th-TH', { hour12: false });
-      const dateStr = thaiTime.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
-      
-      document.getElementById('thaiClock').innerText = `${dateStr} ${timeStr}`;
-    }
+    // Live Clock Thailand
+function updateThaiClock() {
+  const now = new Date();
 
+  const timeStr = now.toLocaleTimeString('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    hour12: false
+  });
+
+  const dateStr = now.toLocaleDateString('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+
+  document.getElementById('thaiClock').innerText =
+    `${dateStr} ${timeStr}`;
+}
     async function fetchWorkLogs() {
       const refreshIcon = document.getElementById('refreshIcon');
       refreshIcon.classList.add('fa-spin');
@@ -868,36 +900,50 @@ function responseJSON(obj) {
     }
 
     function updateActiveDurations() {
-      const activeElements = document.querySelectorAll('[id^="active-duration-"]');
-      const now = new Date();
-      // UTC + 7
-      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const thaiNow = new Date(utc + (3600000 * 7));
+  const activeElements = document.querySelectorAll('[id^="active-duration-"]');
+  const now = new Date();
 
-      activeElements.forEach(el => {
-        const startStr = el.getAttribute('data-starttime');
-        if (!startStr) return;
+  activeElements.forEach(el => {
+    const startStr = el.getAttribute('data-starttime');
+    if (!startStr) return;
 
-        try {
-          const parts = startStr.split(' ');
-          const dParts = parts[0].split('-');
-          const tParts = parts[1].split(':');
-          const startDate = new Date(dParts[0], dParts[1] - 1, dParts[2], tParts[0], tParts[1], tParts[2]);
+    try {
+      const parts = startStr.split(' ');
+      const dParts = parts[0].split('-');
+      const tParts = parts[1].split(':');
 
-          let diffSecs = Math.floor((thaiNow.getTime() - startDate.getTime()) / 1000);
-          if (diffSecs < 0) diffSecs = 0;
+      const startDate = new Date(
+        Number(dParts[0]),
+        Number(dParts[1]) - 1,
+        Number(dParts[2]),
+        Number(tParts[0]),
+        Number(tParts[1]),
+        Number(tParts[2])
+      );
 
-          const hrs = Math.floor(diffSecs / 3600);
-          const mins = Math.floor((diffSecs % 3600) / 60);
-          const secs = diffSecs % 60;
+      let diffSecs = Math.floor(
+        (now.getTime() - startDate.getTime()) / 1000
+      );
 
-          const formatted = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-          el.innerHTML = `<i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ${formatted}`;
-        } catch(e) {
-          el.innerText = '00:00:00';
-        }
-      });
+      if (diffSecs < 0) diffSecs = 0;
+
+      const hrs = Math.floor(diffSecs / 3600);
+      const mins = Math.floor((diffSecs % 3600) / 60);
+      const secs = diffSecs % 60;
+
+      const formatted =
+        `${String(hrs).padStart(2, '0')}:` +
+        `${String(mins).padStart(2, '0')}:` +
+        `${String(secs).padStart(2, '0')}`;
+
+      el.innerHTML =
+        `<i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ${formatted}`;
+
+    } catch(e) {
+      el.innerText = '00:00:00';
     }
+  });
+}
 
     async function handleStartWorkSubmit(e) {
       e.preventDefault();

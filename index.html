@@ -639,15 +639,19 @@ function calculateDurationString(startTimeValue, endDate) {
     const secs = diffSecs % 60;
 
     const result =
-      String(hrs).padStart(2, '0') + ':' +
-      String(mins).padStart(2, '0') + ':' +
-      String(secs).padStart(2, '0');
+  String(hrs).padStart(2, '0') + ':' +
+  String(mins).padStart(2, '0') + ':' +
+  String(secs).padStart(2, '0');
 
-    Logger.log('START = ' + startTimeStr);
-    Logger.log('END = ' + endTimeStr);
-    Logger.log('RESULT = ' + result);
+Logger.log('### DURATION CHECK ###');
+Logger.log('START VALUE = [' + startTimeValue + ']');
+Logger.log('END VALUE = [' + endDate + ']');
+Logger.log('START SECONDS = ' + startSeconds);
+Logger.log('END SECONDS = ' + endSeconds);
+Logger.log('DIFF SECONDS = ' + diffSecs);
+Logger.log('RESULT = [' + result + ']');
 
-    return result;
+return result;
 
   } catch (e) {
     Logger.log('calculateDurationString ERROR: ' + e);

@@ -202,6 +202,83 @@ main h2 {
   background: #7fb4c9;
 }
 
+    /* =========================================
+   PREMIUM LIGHT BLUE - TEXT CONTRAST
+   ========================================= */
+
+/* Main text */
+body,
+main {
+  color: #1e293b !important;
+}
+
+/* หัวข้อหลัก */
+main h1,
+main h2,
+main h3,
+main h4 {
+  color: #0f172a !important;
+}
+
+/* ตัวอักษรทั่วไป */
+main .text-slate-100 {
+  color: #0f172a !important;
+}
+
+main .text-slate-200 {
+  color: #1e293b !important;
+}
+
+main .text-slate-300 {
+  color: #334155 !important;
+}
+
+main .text-slate-400 {
+  color: #64748b !important;
+}
+
+main .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* หัวตาราง */
+#dashboardCardsContainer th {
+  color: #475569 !important;
+}
+
+/* ข้อมูลในตาราง */
+#dashboardCardsContainer td {
+  color: #334155;
+}
+
+/* EMP ID */
+#dashboardCardsContainer .text-sky-400 {
+  color: #0284c7 !important;
+}
+
+/* เวลา */
+#dashboardCardsContainer .font-mono {
+  color: #334155;
+}
+
+/* ป้ายรอบที่ */
+#dashboardCardsContainer .bg-slate-800 .text-slate-300 {
+  color: #475569 !important;
+}
+
+/* ข้อความสถานะ */
+.text-emerald-400 {
+  color: #059669 !important;
+}
+
+.text-amber-300 {
+  color: #d97706 !important;
+}
+
+.text-sky-400 {
+  color: #0284c7 !important;
+}
+
 /* Placeholder */
 input::placeholder {
   color: #94a3b8 !important;
@@ -348,11 +425,14 @@ select option {
             <span>เพิ่มงาน</span>
           </button>
           
-          <button onclick="fetchWorkLogs()" title="รีเฟรชข้อมูล"
-  class="bg-white hover:bg-slate-50 text-slate-600 p-2.5 rounded-xl border border-slate-200 transition">
-  <i class="fa-solid fa-rotate text-slate-600"></i>
-</button>
-          
+          <button onclick="fetchWorkLogs()" title="รีเฟรชข้อมูล" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl border border-slate-700 transition">
+            <i id="refreshIcon" class="fa-solid fa-rotate"></i>
+          </button>
+
+          <button onclick="openGasCodeModal()" title="ดู Code Google Apps Script" class="bg-slate-800 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5 text-xs font-medium">
+            <i class="fa-solid fa-code"></i>
+            <span class="hidden sm:inline">GAS Backend</span>
+          </button>
         </div>
       </div>
     </div>
@@ -550,6 +630,36 @@ select option {
       </form>
     </div>
   </div>
+
+  <!-- MODAL 2: Google Apps Script Backend Code Setup Guide -->
+  <div id="gasCodeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+        <div class="flex items-center gap-2 text-amber-400">
+          <i class="fa-solid fa-code text-lg"></i>
+          <h3 class="text-base font-bold text-white">Google Apps Script Code (Code.gs)</h3>
+        </div>
+        <button onclick="closeGasCodeModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+      </div>
+      
+      <p class="text-xs text-slate-400 mb-3">
+        นำ Source Code ด้านล่างนี้ไปใส่ใน Google Apps Script Editor ของชีต <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA</code> ใน Sheet ชื่อ <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">Work_Log</code> แล้วทำ Web App Deployment ให้สิทธิ์ "Anyone" (ทุกคน)
+      </p>
+
+      <div class="relative flex-grow bg-slate-950 border border-slate-800 rounded-xl p-3 overflow-hidden">
+        <textarea id="gasCodeTextArea" readonly class="w-full h-72 bg-transparent text-emerald-400 font-mono text-xs focus:outline-none resize-none leading-relaxed"></textarea>
+      </div>
+
+      <div class="pt-4 flex items-center justify-between">
+        <span class="text-xs text-slate-500">LockService & TimeZone: Asia/Bangkok GMT+7</span>
+        <button onclick="copyGasCode()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg">
+          <i class="fa-solid fa-copy"></i>
+          <span>คัดลอก Code GAS</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* --------------------------------------------------------
        CONFIGURATIONS & CONSTANTS

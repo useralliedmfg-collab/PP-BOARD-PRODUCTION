@@ -549,36 +549,6 @@ select option {
       </form>
     </div>
   </div>
-
-  <!-- MODAL 2: Google Apps Script Backend Code Setup Guide -->
-  <div id="gasCodeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
-        <div class="flex items-center gap-2 text-amber-400">
-          <i class="fa-solid fa-code text-lg"></i>
-          <h3 class="text-base font-bold text-white">Google Apps Script Code (Code.gs)</h3>
-        </div>
-        <button onclick="closeGasCodeModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
-      </div>
-      
-      <p class="text-xs text-slate-400 mb-3">
-        นำ Source Code ด้านล่างนี้ไปใส่ใน Google Apps Script Editor ของชีต <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA</code> ใน Sheet ชื่อ <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">Work_Log</code> แล้วทำ Web App Deployment ให้สิทธิ์ "Anyone" (ทุกคน)
-      </p>
-
-      <div class="relative flex-grow bg-slate-950 border border-slate-800 rounded-xl p-3 overflow-hidden">
-        <textarea id="gasCodeTextArea" readonly class="w-full h-72 bg-transparent text-emerald-400 font-mono text-xs focus:outline-none resize-none leading-relaxed"></textarea>
-      </div>
-
-      <div class="pt-4 flex items-center justify-between">
-        <span class="text-xs text-slate-500">LockService & TimeZone: Asia/Bangkok GMT+7</span>
-        <button onclick="copyGasCode()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg">
-          <i class="fa-solid fa-copy"></i>
-          <span>คัดลอก Code GAS</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script>
     /* --------------------------------------------------------
        CONFIGURATIONS & CONSTANTS

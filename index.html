@@ -759,10 +759,9 @@ function handleStartWork(params) {
   const workOrder = String(params.workOrder || '').trim();
   const machine = String(params.machine || '').trim();
 
-  if (!empId || empId.length !== 7 || isNaN(empId)) {
-    return responseJSON({ status: 'error', message: 'EMP ID ต้องเป็นตัวเลข 7 หลักเท่านั้น' });
-  }
-
+  if (!empId || !/^\d{6,7}$/.test(empId)) {
+  return responseJSON({ status: 'error', message: 'EMP ID ต้องเป็นตัวเลข 6-7 หลักเท่านั้น' });
+}
   const sheet = getSheet();
 
 const lastRow = sheet.getLastRow();
@@ -1389,17 +1388,21 @@ if (log) {
       e.preventDefault();
 
       const empId = document.getElementById('inputEmpId').value.trim();
-      const workOrder = document.getElementById('inputWorkOrder').value.trim().toUpperCase();
+      const workOrderNo = document.getElementById('inputWorkOrder').value.trim();
+        if (!/^\d+$/.test(workOrderNo)) {
+    showErrorToast('WorkOrder ต้องเป็นตัวเลขเท่านั้น');
+    return;
+  }
+      const workOrder = `WO-${workOrderNo}`;
       const machineSelect = document.getElementById('inputMachineSelect').value;
       const customMachine = document.getElementById('inputCustomMachine').value.trim();
 
       const machine = machineSelect === 'CUSTOM' ? customMachine : machineSelect;
 
-      if (!empId || empId.length !== 7 || isNaN(empId)) {
-        showErrorToast('EMP ID ต้องเป็นรหัสพนักงานตัวเลข 7 หลัก');
-        return;
-      }
-
+      if (!empId || !/^\d{6,7}$/.test(empId)) {
+  showErrorToast('EMP ID ต้องเป็นรหัสพนักงานตัวเลข 6-7 หลัก');
+  return;
+}
       if (!workOrder) {
         showErrorToast('กรุณาระบุ WorkOrder');
         return;

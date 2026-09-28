@@ -1217,12 +1217,31 @@ function responseJSON(obj) {
               <table class="w-full text-left border-collapse">
                 <thead>
   <tr class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">
-    <th class="py-2 px-3 text-left whitespace-nowrap">รอบที่ (Round)</th>
-    <th class="py-2 px-3 text-left whitespace-nowrap">เวลาเริ่ม (Start Time)</th>
-    <th class="py-2 px-3 text-left whitespace-nowrap">เวลาจบ (End Time)</th>
-    <th class="py-2 px-3 text-left whitespace-nowrap">ระยะเวลา (Duration)</th>
-    <th class="py-2 px-3 text-right whitespace-nowrap">จำนวนชิ้นงาน (Quantity)</th>
-    <th class="py-2 px-3 text-center whitespace-nowrap">การจัดการ (Action)</th>
+    
+    <th class="py-2 px-3 text-center whitespace-nowrap">
+      รอบที่ (Round)
+    </th>
+
+    <th class="py-2 px-3 text-center whitespace-nowrap">
+      เวลาเริ่ม (Start Time)
+    </th>
+
+    <th class="py-2 px-3 text-center whitespace-nowrap">
+      เวลาจบ (End Time)
+    </th>
+
+    <th class="py-2 px-3 text-center whitespace-nowrap">
+      ระยะเวลา (Duration)
+    </th>
+
+    <th class="py-2 px-3 text-center whitespace-nowrap">
+      จำนวนชิ้นงาน (Quantity)
+    </th>
+
+    <th class="py-2 px-3 text-center whitespace-nowrap">
+      การจัดการ (Action)
+    </th>
+
   </tr>
 </thead>
                 <tbody class="divide-y divide-slate-800/40 text-xs">
@@ -1237,47 +1256,85 @@ function responseJSON(obj) {
 
       container.innerHTML = html;
     }
-
-    function renderSessionRow(sess, roundNum) {
-      const isCompleted = sess.status === 'COMPLETED';
+    
+function renderSessionRow(sess, roundNum) {
+  const isCompleted = sess.status === 'COMPLETED';
+  
+  return `
+    <tr class="hover:bg-slate-800/40 transition">
       
-      return `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="py-3 px-3 font-medium text-slate-300">
-  <div class="flex flex-col items-start gap-1">
-    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-      รอบที่ ${roundNum}
-    </span>
-    <span class="text-[10px] text-sky-400 font-mono">
-      EMP ID: ${escapeHtml(sess.empId)}
-    </span>
-  </div>
-</td>
-          <td class="py-3 px-3 font-mono text-slate-300">${formatAppDateTime(sess.startTime)}</td>
-          <td class="py-3 px-3 font-mono text-slate-300">${isCompleted ? formatAppDateTime(sess.endTime) : '<span class="text-slate-500">--:--:--</span>'}</td>
-          <td class="py-3 px-3 font-mono">
-            ${isCompleted 
-              ? `<span class="text-sky-400 font-semibold">${formatDuration(sess.duration)}</span>`
-              : `<span id="active-duration-${sess.id}" data-starttime="${sess.startTime}" class="text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-stopwatch animate-pulse"></i> 00:00:00</span>`
-            }
-          </td>
-          <td class="py-3 px-3 text-right font-mono">
-            ${isCompleted 
-              ? `<span class="font-bold text-amber-300 text-sm">${Number(sess.quantity).toLocaleString('th-TH')} ชิ้น</span>`
-              : `<span class="text-slate-500">-</span>`
-            }
-          </td>
-          <td class="py-3 px-3 text-center">
-            ${isCompleted
-              ? `<span class="inline-flex items-center gap-1 text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg text-xs border border-sky-500/20"><i class="fa-solid fa-circle-check"></i> COMPLETED</span>`
-              : `<button onclick="completeWorkPrompt('${sess.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-3 py-1.5 rounded-xl shadow-lg shadow-emerald-900/30 text-xs inline-flex items-center gap-1.5 transition active:scale-95">
-                   <i class="fa-solid fa-flag-checkered"></i> <span>ปิดงาน</span>
-                 </button>`
-            }
-          </td>
-        </tr>
-      `;
-    }
+      <!-- ROUND / EMP ID -->
+      <td class="py-3 px-3 text-center align-middle font-medium text-slate-300">
+        <div class="flex flex-col items-center justify-center gap-1">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap">
+            รอบที่ ${roundNum}
+          </span>
+          <span class="text-[10px] text-sky-400 font-mono whitespace-nowrap">
+            EMP ID: ${escapeHtml(sess.empId)}
+          </span>
+        </div>
+      </td>
+
+      <!-- START TIME -->
+      <td class="py-3 px-3 text-center align-middle font-mono text-slate-300 whitespace-nowrap">
+        ${formatAppDateTime(sess.startTime)}
+      </td>
+
+      <!-- END TIME -->
+      <td class="py-3 px-3 text-center align-middle font-mono text-slate-300 whitespace-nowrap">
+        ${isCompleted
+          ? formatAppDateTime(sess.endTime)
+          : '<span class="text-slate-500">--:--:--</span>'
+        }
+      </td>
+
+      <!-- DURATION -->
+      <td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">
+        ${isCompleted 
+          ? `<span class="text-sky-400 font-semibold">${formatDuration(sess.duration)}</span>`
+          : `<span id="active-duration-${sess.id}"
+                   data-starttime="${sess.startTime}"
+                   class="text-emerald-400 font-bold inline-flex items-center justify-center gap-1">
+                   <i class="fa-solid fa-stopwatch animate-pulse"></i>
+                   00:00:00
+             </span>`
+        }
+      </td>
+
+      <!-- QUANTITY -->
+      <td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">
+        ${isCompleted 
+          ? `<span class="font-bold text-amber-300 text-sm">
+               ${Number(sess.quantity).toLocaleString('th-TH')} ชิ้น
+             </span>`
+          : `<span class="text-slate-500">-</span>`
+        }
+      </td>
+
+      <!-- ACTION -->
+      <td class="py-3 px-3 text-center align-middle whitespace-nowrap">
+        ${isCompleted
+          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg text-xs border border-sky-500/20">
+               <i class="fa-solid fa-circle-check"></i>
+               COMPLETED
+             </span>`
+          : `<button
+               onclick="completeWorkPrompt('${sess.id}')"
+               class="bg-gradient-to-r from-emerald-500 to-teal-600
+                      hover:from-emerald-600 hover:to-teal-700
+                      text-white font-semibold px-3 py-1.5 rounded-xl
+                      shadow-lg shadow-emerald-900/30 text-xs
+                      inline-flex items-center justify-center gap-1.5
+                      transition active:scale-95">
+               <i class="fa-solid fa-flag-checkered"></i>
+               <span>ปิดงาน</span>
+             </button>`
+        }
+      </td>
+
+    </tr>
+  `;
+}
 
     async function completeWorkPrompt(id) {
       const { value: quantity } = await Swal.fire({

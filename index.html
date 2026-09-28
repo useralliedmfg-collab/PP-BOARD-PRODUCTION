@@ -600,13 +600,15 @@ select option {
       </span>
 
       <input
-        type="text"
-        id="inputWorkOrder"
-        placeholder="123456"
-        inputmode="numeric"
-        pattern="[0-9]+"
-        required
-        oninput="this.value = this.value.replace(/\D/g, '')"
+  type="text"
+  id="inputWorkOrder"
+  placeholder="12345678"
+  inputmode="numeric"
+  pattern="[0-9]{8}"
+  maxlength="8"
+  minlength="8"
+  required
+  oninput="this.value = this.value.replace(/\D/g, '').slice(0, 8)"
         class="w-full bg-slate-800 border border-slate-700 rounded-r-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
       >
     </div>
@@ -1462,10 +1464,10 @@ if (log) {
 
       const empId = document.getElementById('inputEmpId').value.trim();
       const workOrderNo = document.getElementById('inputWorkOrder').value.trim();
-        if (!/^\d+$/.test(workOrderNo)) {
-    showErrorToast('WorkOrder ต้องเป็นตัวเลขเท่านั้น');
-    return;
-  }
+        if (!/^\d{8}$/.test(workOrderNo)) {
+  showErrorToast('WorkOrder ต้องเป็นตัวเลข 8 หลักเท่านั้น');
+  return;
+}
       const workOrder = `WO-${workOrderNo}`;
       const machineSelect = document.getElementById('inputMachineSelect').value;
       const customMachine = document.getElementById('inputCustomMachine').value.trim();

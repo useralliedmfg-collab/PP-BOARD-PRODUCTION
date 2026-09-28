@@ -566,7 +566,7 @@ select option {
       </div>
 
       <!-- Add Work Form -->
-      <form id="addWorkForm" onsubmit="handleStartWorkSubmit(event)" class="space-y-4">
+      <form id="addWorkForm" onsubmit="handleStartWorkSubmit(event)" novalidate class="space-y-4">
         <!-- EMP ID Field -->
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">
@@ -1497,8 +1497,35 @@ const workOrder = `WO-${workOrderNo}`;
 
       const machine = machineSelect === 'CUSTOM' ? customMachine : machineSelect;
 
-      if (!empId || !/^\d{6,7}$/.test(empId)) {
-  showErrorToast('EMP ID ต้องเป็นรหัสพนักงานตัวเลข 6-7 หลัก');
+      if (!empId) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'กรุณากรอก EMP ID',
+    text: 'กรุณากรอกรหัสพนักงาน 6 หรือ 7 หลัก',
+    background: '#0f172a',
+    color: '#f8fafc',
+    confirmButtonColor: '#0284c7',
+    confirmButtonText: 'ตกลง',
+    customClass: {
+      popup: 'rounded-2xl'
+    }
+  });
+  return;
+}
+
+if (!/^\d{6,7}$/.test(empId)) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'EMP ID ไม่ถูกต้อง',
+    text: 'กรุณากรอกรหัสพนักงานเป็นตัวเลข 6 หรือ 7 หลักเท่านั้น',
+    background: '#0f172a',
+    color: '#f8fafc',
+    confirmButtonColor: '#0284c7',
+    confirmButtonText: 'ตกลง',
+    customClass: {
+      popup: 'rounded-2xl'
+    }
+  });
   return;
 }
       if (!machine) {

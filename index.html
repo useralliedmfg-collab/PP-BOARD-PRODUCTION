@@ -1464,11 +1464,34 @@ if (log) {
 
       const empId = document.getElementById('inputEmpId').value.trim();
       const workOrderNo = document.getElementById('inputWorkOrder').value.trim();
-        if (!/^\d{8}$/.test(workOrderNo)) {
-  showErrorToast('WorkOrder ต้องเป็นตัวเลข 8 หลักเท่านั้น');
+
+if (!workOrderNo) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'กรุณากรอก WorkOrder',
+    text: 'กรุณากรอกเลข WorkOrder 8 หลัก',
+    background: '#0f172a',
+    color: '#f8fafc',
+    confirmButtonColor: '#0284c7',
+    confirmButtonText: 'ตกลง'
+  });
   return;
 }
-      const workOrder = `WO-${workOrderNo}`;
+
+if (!/^\d{8}$/.test(workOrderNo)) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'WorkOrder ไม่ครบ',
+    text: 'กรุณากรอกเลข WorkOrder ให้ครบ 8 หลัก',
+    background: '#0f172a',
+    color: '#f8fafc',
+    confirmButtonColor: '#0284c7',
+    confirmButtonText: 'ตกลง'
+  });
+  return;
+}
+
+const workOrder = `WO-${workOrderNo}`;
       const machineSelect = document.getElementById('inputMachineSelect').value;
       const customMachine = document.getElementById('inputCustomMachine').value.trim();
 
@@ -1478,11 +1501,6 @@ if (log) {
   showErrorToast('EMP ID ต้องเป็นรหัสพนักงานตัวเลข 6-7 หลัก');
   return;
 }
-      if (!workOrder) {
-        showErrorToast('กรุณาระบุ WorkOrder');
-        return;
-      }
-
       if (!machine) {
         showErrorToast('กรุณาระบุ Machine');
         return;

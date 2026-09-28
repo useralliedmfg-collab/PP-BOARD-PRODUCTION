@@ -570,17 +570,17 @@ select option {
         <!-- EMP ID Field -->
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">
-            EMP ID <span class="text-red-400">* (ตัวเลข 7 หลัก)</span>
+            EMP ID <span class="text-red-400">* (ตัวเลข 6 หรือ 7 หลัก)</span>
           </label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
               <i class="fa-solid fa-id-card"></i>
             </span>
-            <input type="text" id="inputEmpId" maxlength="7" placeholder="เช่น 0123456" required
-                   pattern="[0-9]{7}" title="กรุณากรอกตัวเลข 7 หลัก"
+            <input type="text" id="inputEmpId" maxlength="7" placeholder="เช่น 012345 หรือ 0123456" required
+       pattern="[0-9]{6,7}" title="กรุณากรอกตัวเลข 6 หรือ 7 หลัก"
                    class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono">
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">ต้องเป็นรหัสพนักงานตัวเลข 7 หลักเท่านั้น</p>
+          <p class="text-[11px] text-slate-500 mt-1">ต้องเป็นรหัสพนักงานตัวเลข 6 หรือ 7 หลักเท่านั้น</p>
         </div>
 
         <!-- WorkOrder Field -->

@@ -1291,26 +1291,26 @@ const resData = await response.json();
                 <!-- WorkOrder Badge -->
                 <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
                   <i class="fa-solid fa-file-invoice text-amber-400 text-xs"></i>
-                  <span class="text-xs text-slate-400">WO:</span>
-                  <span class="font-mono font-bold text-amber-300">${escapeHtml(group.workOrder)}</span>
+                  <span class="text-[14px] text-slate-400">WO:</span>
+                  <span class="font-mono font-bold text-[16px] text-amber-300">${escapeHtml(group.workOrder)}</span>
                 </div>
 
                 <!-- Machine Badge -->
                 <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
                   <i class="fa-solid fa-industry text-purple-400 text-xs"></i>
-                  <span class="text-xs text-slate-400">Machine:</span>
-                  <span class="font-bold text-purple-300">${escapeHtml(group.machine)}</span>
+                  <span class="text-[14px] text-slate-400">Machine:</span>
+                  <span class="font-bold text-[16px] text-purple-300">${escapeHtml(group.machine)}</span>
                 </div>
               </div>
 
               <!-- Overall Status Badge -->
               <div>
                 ${hasActiveSession 
-                  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[14px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                        กำลังดำเนินการ (IN_PROGRESS)
                      </span>`
-                  : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                  : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[14px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
                        <i class="fa-solid fa-check text-xs"></i> เสร็จสิ้นแล้วทุกรอบ
                      </span>`
                 }
@@ -1321,7 +1321,7 @@ const resData = await response.json();
             <div class="overflow-x-auto scoreboard-scroll">
               <table class="w-full text-left border-collapse">
                 <thead>
-  <tr class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">
+  <tr class="text-[14px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">
     
     <th class="py-2 px-3 text-center whitespace-nowrap">
       รอบที่ (Round)
@@ -1349,7 +1349,7 @@ const resData = await response.json();
 
   </tr>
 </thead>
-                <tbody class="divide-y divide-slate-800/40 text-xs">
+                <tbody class="divide-y divide-slate-800/40 text-[14px]">
                   ${group.sessions.map((sess, idx) => renderSessionRow(sess, idx + 1)).join('')}
                 </tbody>
               </table>
@@ -1371,12 +1371,13 @@ function renderSessionRow(sess, roundNum) {
       <!-- ROUND / EMP ID -->
       <td class="py-3 px-3 text-center align-middle font-medium text-slate-300">
         <div class="flex flex-col items-center justify-center gap-1">
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap">
-            รอบที่ ${roundNum}
-          </span>
-          <span class="text-[10px] text-sky-400 font-mono whitespace-nowrap">
-            EMP ID: ${escapeHtml(sess.empId)}
-          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[14px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap">
+  รอบที่ ${roundNum}
+</span>
+
+<span class="text-[14px] text-sky-400 font-mono whitespace-nowrap">
+  EMP ID: ${escapeHtml(sess.empId)}
+</span>
         </div>
       </td>
 
@@ -1396,10 +1397,10 @@ function renderSessionRow(sess, roundNum) {
       <!-- DURATION -->
       <td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">
         ${isCompleted 
-          ? `<span class="text-sky-400 font-semibold">${formatDuration(sess.duration)}</span>`
+          ? `<span class="text-sky-400 font-semibold text-[15px]">${formatDuration(sess.duration)}</span>`
           : `<span id="active-duration-${sess.id}"
                    data-starttime="${sess.startTime}"
-                   class="text-emerald-400 font-bold inline-flex items-center justify-center gap-1">
+                   class="text-emerald-400 font-bold text-[15px] inline-flex items-center justify-center gap-1">
                    <i class="fa-solid fa-stopwatch animate-pulse"></i>
                    00:00:00
              </span>`
@@ -1409,9 +1410,9 @@ function renderSessionRow(sess, roundNum) {
       <!-- QUANTITY -->
       <td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">
         ${isCompleted 
-          ? `<span class="font-bold text-amber-300 text-sm">
-               ${Number(sess.quantity).toLocaleString('th-TH')} ชิ้น
-             </span>`
+          ? `<span class="font-bold text-amber-300 text-[16px]">
+  ${Number(sess.quantity).toLocaleString('th-TH')} ชิ้น
+</span>`
           : `<span class="text-slate-500">-</span>`
         }
       </td>
@@ -1419,7 +1420,7 @@ function renderSessionRow(sess, roundNum) {
       <!-- ACTION -->
       <td class="py-3 px-3 text-center align-middle whitespace-nowrap">
         ${isCompleted
-          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg text-xs border border-sky-500/20">
+          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-400 bg-sky-500/10 px-3 py-1.5 rounded-lg text-[14px] border border-sky-500/20">
                <i class="fa-solid fa-circle-check"></i>
                COMPLETED
              </span>`

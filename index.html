@@ -37,9 +37,43 @@
   </script>
 
   <style>
-    body {
-      font-family: 'Noto Sans Thai', sans-serif;
-    }
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
+
+  /* Complete Work Popup */
+  .complete-work-popup {
+    border-radius: 22px !important;
+    padding: 32px !important;
+  }
+
+  .complete-work-title {
+    font-size: 26px !important;
+  }
+
+  .complete-work-text {
+    font-size: 15px !important;
+  }
+
+  .complete-work-input {
+    height: 54px !important;
+    font-size: 20px !important;
+    text-align: center !important;
+    border-radius: 12px !important;
+  }
+
+  .complete-work-confirm,
+  .complete-work-cancel {
+    font-size: 15px !important;
+    padding: 12px 20px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
@@ -1413,7 +1447,7 @@ function renderSessionRow(sess, roundNum) {
     async function completeWorkPrompt(id) {
       const { value: quantity } = await Swal.fire({
   title: 'ปิดงาน (Complete Work)',
-  width: '500px',
+    width: '560px',
         text: 'กรุณากรอกจำนวนชิ้นงานที่ผลิตสำเร็จในรอบนี้',
         input: 'number',
         inputAttributes: {
@@ -1428,6 +1462,14 @@ function renderSessionRow(sess, roundNum) {
         cancelButtonColor: '#475569',
         background: '#0f172a',
         color: '#f8fafc',
+        customClass: {
+  popup: 'complete-work-popup',
+  title: 'complete-work-title',
+  htmlContainer: 'complete-work-text',
+  input: 'complete-work-input',
+  confirmButton: 'complete-work-confirm',
+  cancelButton: 'complete-work-cancel'
+},
         inputValidator: (value) => {
           if (!value || isNaN(value) || Number(value) < 0) {
             return 'กรุณากรอกจำนวนชิ้นงานให้ถูกต้อง (0 ขึ้นไป)';

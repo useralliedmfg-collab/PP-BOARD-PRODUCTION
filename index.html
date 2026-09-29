@@ -1040,37 +1040,79 @@ function responseJSON(obj) {
       document.getElementById('thaiClock').innerText = `${dateStr} ${timeStr}`;
     }
 
-    async function fetchWorkLogs() {
-      const refreshIcon = document.getElementById('refreshIcon');
-      refreshIcon.classList.add('fa-spin');
-      
-      const syncStatus = document.getElementById('syncStatus');
-      syncStatus.className = 'flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
-      syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span><span>กำลังดึงข้อมูล...</span>';
+    async function fetchWorkLogs(retryCount = 0) {
+  const refreshIcon = document.getElementById('refreshIcon');
+  refreshIcon.classList.add('fa-spin');
 
-      try {
-        const response = await fetch(`${GAS_ENDPOINT}?action=getWorkLogs&t=${Date.now()}`);
-        const resData = await response.json();
+  const syncStatus = document.getElementById('syncStatus');
 
-        if (resData.status === 'success') {
-          rawWorkLogs = resData.data || [];
-          populateMachineFilterOptions();
-          renderDashboard();
-          
-          syncStatus.className = 'flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
-          syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>เชื่อมต่อสำเร็จ</span>';
-        } else {
-          showErrorToast('ไม่สามารถดึงข้อมูลได้: ' + resData.message);
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
-        syncStatus.className = 'flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
-        syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400"></span><span>การเชื่อมต่อขัดข้อง</span>';
-      } finally {
-        refreshIcon.classList.remove('fa-spin');
-      }
+  syncStatus.className =
+    'flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
+
+  syncStatus.innerHTML =
+    '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>' +
+    `<span>${retryCount > 0 ? `กำลังเชื่อมต่อใหม่ (${retryCount}/3)...` : 'กำลังดึงข้อมูล...'}</span>`;
+
+  try {
+    const response = await fetch(
+  `${GAS_ENDPOINT}?action=getWorkLogs&t=${Date.now()}`
+);
+
+if (!response.ok) {
+  throw new Error(`Backend HTTP Error: ${response.status}`);
+}
+
+const resData = await response.json();
+
+    if (resData.status === 'success') {
+      rawWorkLogs = resData.data || [];
+
+      populateMachineFilterOptions();
+      renderDashboard();
+
+      syncStatus.className =
+        'flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
+
+      syncStatus.innerHTML =
+        '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>' +
+        '<span>เชื่อมต่อสำเร็จ</span>';
+
+      return;
     }
 
+    showErrorToast(
+      'ไม่สามารถดึงข้อมูลได้: ' +
+      (resData.message || 'ไม่ทราบสาเหตุ')
+    );
+
+  } catch (err) {
+    console.error(
+      `Fetch error (attempt ${retryCount + 1}/3):`,
+      err
+    );
+
+    // Retry สูงสุด 3 ครั้ง
+    if (retryCount < 2) {
+      const retryDelay = retryCount === 0 ? 1000 : 2000;
+
+      await new Promise(resolve =>
+        setTimeout(resolve, retryDelay)
+      );
+
+      return fetchWorkLogs(retryCount + 1);
+    }
+
+    syncStatus.className =
+      'flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
+
+    syncStatus.innerHTML =
+      '<span class="w-2 h-2 rounded-full bg-rose-400"></span>' +
+      '<span>การเชื่อมต่อขัดข้อง</span>';
+
+  } finally {
+    refreshIcon.classList.remove('fa-spin');
+  }
+}
     function populateMachineFilterOptions() {
       const select = document.getElementById('filterMachine');
       if (!select) return;

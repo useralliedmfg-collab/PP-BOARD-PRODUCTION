@@ -538,19 +538,19 @@ select option {
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <!-- EMP ID Search -->
         <div>
-          <label class="block text-xs text-slate-400 mb-1">EMP ID (7 หลัก)</label>
+          <label class="block text-[13px] text-slate-400 mb-1">EMP ID (7 หลัก)</label>
           <input type="text" id="filterEmpId" oninput="applyFilters()" placeholder="ค้นหา EMP ID..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
         </div>
 
         <!-- WorkOrder Filter -->
         <div>
-          <label class="block text-xs text-slate-400 mb-1">WorkOrder</label>
+          <label class="block text-[13px] text-slate-400 mb-1">WorkOrder</label>
           <input type="text" id="filterWorkOrder" oninput="applyFilters()" placeholder="เช่น WO-260923..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
         </div>
 
         <!-- Machine Filter -->
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Machine</label>
+          <label class="block text-[13px] text-slate-400 mb-1">Machine</label>
           <select id="filterMachine" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
             <option value="">ทั้งหมดทุกเครื่อง</option>
           </select>
@@ -558,7 +558,7 @@ select option {
 
         <!-- Status Filter -->
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Status</label>
+          <label class="block text-[13px] text-slate-400 mb-1">Status</label>
           <select id="filterStatus" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
             <option value="">ทุกสถานะ</option>
             <option value="IN_PROGRESS">IN_PROGRESS (กำลังทำ)</option>
@@ -568,7 +568,7 @@ select option {
 
         <!-- Date Filter -->
         <div>
-          <label class="block text-xs text-slate-400 mb-1">วันที่ (Date)</label>
+          <label class="block text-[13px] text-slate-400 mb-1">วันที่ (Date)</label>
           <input type="date" id="filterDate" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
         </div>
       </div>

@@ -575,12 +575,29 @@ select option {
     </div>
 
     <!-- Production Cards List Header -->
-    <div class="flex items-center justify-between pt-2">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <i class="fa-solid fa-list-check text-sky-400"></i> รายการกลุ่มงาน (Production Groups)
-      </h2>
-      <span id="groupCountBadge" class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">0 กลุ่ม</span>
+<div class="flex items-center justify-between gap-4">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
+      <i class="fa-solid fa-layer-group text-sky-600 text-lg"></i>
     </div>
+
+    <div>
+      <h2 class="text-xl font-bold text-slate-900 leading-tight">
+        รายการกลุ่มงาน
+      </h2>
+      <p class="text-sm text-slate-500 mt-0.5">
+        Production Groups
+      </p>
+    </div>
+  </div>
+
+  <span id="groupCountBadge"
+        class="inline-flex items-center px-3 py-1.5 rounded-full
+               bg-sky-50 border border-sky-200
+               text-sm font-semibold text-sky-700 whitespace-nowrap">
+    0 งาน
+  </span>
+</div>
 
     <!-- Group Cards Container -->
     <div id="dashboardCardsContainer" class="space-y-4">

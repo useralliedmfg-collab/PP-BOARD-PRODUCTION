@@ -1421,10 +1421,10 @@ function renderSessionRow(sess, roundNum) {
       <!-- ACTION -->
       <td class="py-3 px-3 text-center align-middle whitespace-nowrap">
         ${isCompleted
-          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-400 bg-sky-500/10 px-3 py-1.5 rounded-lg text-[14px] border border-sky-500/20">
-               <i class="fa-solid fa-circle-check"></i>
-               COMPLETED
-             </span>`
+          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-700 bg-sky-50 px-3 py-1.5 rounded-lg text-[14px] border border-sky-200">
+  <i class="fa-solid fa-circle-check"></i>
+  เสร็จสิ้น
+</span>`
           : `<button
                onclick="completeWorkPrompt('${sess.id}')"
                class="bg-gradient-to-r from-emerald-500 to-teal-600

@@ -1412,7 +1412,8 @@ function renderSessionRow(sess, roundNum) {
 
     async function completeWorkPrompt(id) {
       const { value: quantity } = await Swal.fire({
-        title: 'ปิดงาน (Complete Work)',
+  title: 'ปิดงาน (Complete Work)',
+  width: '500px',
         text: 'กรุณากรอกจำนวนชิ้นงานที่ผลิตสำเร็จในรอบนี้',
         input: 'number',
         inputAttributes: {

@@ -1396,17 +1396,17 @@ function renderSessionRow(sess, roundNum) {
       </td>
 
       <!-- DURATION -->
-      <td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">
-        ${isCompleted 
-          ? `<span class="text-sky-400 font-semibold text-[15px]">${formatDuration(sess.duration)}</span>`
-          : `<span id="active-duration-${sess.id}"
-                   data-starttime="${sess.startTime}"
-                   class="text-emerald-400 font-bold text-[15px] inline-flex items-center justify-center gap-1">
-                   <i class="fa-solid fa-stopwatch animate-pulse"></i>
-                   00:00:00
-             </span>`
-        }
-      </td>
+<td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">
+  ${isCompleted 
+    ? `<span class="text-red-400 font-semibold">${formatDuration(sess.duration)}</span>`
+    : `<span id="active-duration-${sess.id}"
+             data-starttime="${sess.startTime}"
+             class="text-red-400 font-bold inline-flex items-center justify-center gap-1">
+             <i class="fa-solid fa-stopwatch animate-pulse"></i>
+             00:00:00
+       </span>`
+  }
+</td>
 
       <!-- QUANTITY -->
       <td class="py-3 px-3 text-center align-middle font-mono whitespace-nowrap">

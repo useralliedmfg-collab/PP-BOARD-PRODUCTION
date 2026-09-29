@@ -38,13 +38,8 @@ colors: {
 
   <style>
   body {
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
 
   /* Complete Work Popup */
   .complete-work-popup {
@@ -436,7 +431,7 @@ select option {
 <div class="flex items-center justify-center gap-3 mb-1">
   <span class="h-px w-8 sm:w-12 bg-gradient-to-r from-transparent to-sky-300"></span>
 
-  <span class="text-[10px] sm:text-[11px] font-bold tracking-[0.35em] text-sky-700 uppercase">
+  <span class="text-[10px] sm:text-xs font-bold tracking-[0.35em] text-sky-700 uppercase">
     PRODUCTION SYSTEM
   </span>
 
@@ -444,25 +439,25 @@ select option {
 </div>
 
   <!-- PP BOARD -->
-  <span class="block text-3xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-sky-700 via-cyan-700 to-blue-800 mt-0.5">
+  <span class="block text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-sky-700 via-cyan-700 to-blue-800 mt-0.5">
     PP BOARD
   </span>
 
 </h1>
-          <p class="text-[11px] sm:text-sm text-slate-400 mt-0.5">ระบบบันทึกติดตามการทำงาน Production Real-time</p>
+          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">ระบบบันทึกติดตามการทำงาน Production Real-time</p>
         </div>
       </div>
 
       <!-- Action Bar & Time Info -->
       <div class="py-3 flex flex-wrap items-center justify-between gap-4">
         <!-- Thai Clock & Status -->
-        <div class="flex items-center gap-4 text-[11px] sm:text-sm">
+        <div class="flex items-center gap-4 text-xs sm:text-sm">
           <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2">
             <i class="fa-regular fa-clock text-sky-400"></i>
             <span id="thaiClock" class="font-mono font-medium text-slate-200">--:--:--</span>
-            <span class="text-slate-500 text-[11px]">GMT+7</span>
+            <span class="text-slate-500 text-xs">GMT+7</span>
           </div>
-          <div id="syncStatus" class="flex items-center gap-2 text-[11px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+          <div id="syncStatus" class="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             <span>เชื่อมต่อสำเร็จ</span>
           </div>
@@ -479,7 +474,7 @@ select option {
             <i id="refreshIcon" class="fa-solid fa-rotate"></i>
           </button>
 
-          <button onclick="openGasCodeModal()" title="ดู Code Google Apps Script" class="bg-sky-50 hover:bg-sky-100 text-amber-600 p-2.5 rounded-xl border border-sky-200 transition flex items-center gap-1.5 text-[11px] font-medium">
+          <button onclick="openGasCodeModal()" title="ดู Code Google Apps Script" class="bg-sky-50 hover:bg-sky-100 text-amber-600 p-2.5 rounded-xl border border-sky-200 transition flex items-center gap-1.5 text-xs font-medium">
             <i class="fa-solid fa-code"></i>
             <span class="hidden sm:inline">GAS Backend</span>
           </button>
@@ -495,8 +490,8 @@ select option {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
       <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
         <div>
-          <p class="text-[11px] font-medium text-slate-400">งานกำลังดำเนินการ</p>
-          <h3 id="statInProgress" class="text-3xl font-bold text-emerald-400 mt-1">0</h3>
+          <p class="text-xs font-medium text-slate-400">งานกำลังดำเนินการ</p>
+          <h3 id="statInProgress" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
         </div>
         <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
           <i class="fa-solid fa-play text-sm"></i>
@@ -505,8 +500,8 @@ select option {
 
       <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
         <div>
-          <p class="text-[11px] font-medium text-slate-400">เสร็จสิ้นแล้ว (รอบ)</p>
-          <h3 id="statCompleted" class="text-3xl font-bold text-sky-400 mt-1">0</h3>
+          <p class="text-xs font-medium text-slate-400">เสร็จสิ้นแล้ว (รอบ)</p>
+          <h3 id="statCompleted" class="text-2xl font-bold text-sky-400 mt-1">0</h3>
         </div>
         <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
           <i class="fa-solid fa-circle-check"></i>
@@ -515,8 +510,8 @@ select option {
 
       <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
         <div>
-          <p class="text-[11px] font-medium text-slate-400">กลุ่มงานทั้งหมด</p>
-          <h3 id="statTotalGroups" class="text-3xl font-bold text-amber-400 mt-1">0</h3>
+          <p class="text-xs font-medium text-slate-400">กลุ่มงานทั้งหมด</p>
+          <h3 id="statTotalGroups" class="text-2xl font-bold text-amber-400 mt-1">0</h3>
         </div>
         <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
           <i class="fa-solid fa-layer-group"></i>
@@ -525,8 +520,8 @@ select option {
 
       <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
         <div>
-          <p class="text-[11px] font-medium text-slate-400">พนักงานที่ปฏิบัติงาน</p>
-          <h3 id="statActiveEmps" class="text-3xl font-bold text-purple-400 mt-1">0</h3>
+          <p class="text-xs font-medium text-slate-400">พนักงานที่ปฏิบัติงาน</p>
+          <h3 id="statActiveEmps" class="text-2xl font-bold text-purple-400 mt-1">0</h3>
         </div>
         <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
           <i class="fa-solid fa-id-badge"></i>
@@ -536,26 +531,26 @@ select option {
 
     <!-- Filters Bar -->
     <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-xl space-y-3">
-      <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
         <span class="flex items-center gap-2"><i class="fa-solid fa-filter text-sky-400"></i> ตัวกรองข้อมูล (Dashboard Filters)</span>
-        <button onclick="resetFilters()" class="text-sky-400 hover:text-sky-300 transition text-[11px] font-normal">ล้างตัวกรอง</button>
+        <button onclick="resetFilters()" class="text-sky-400 hover:text-sky-300 transition text-xs font-normal">ล้างตัวกรอง</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <!-- EMP ID Search -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1">EMP ID (7 หลัก)</label>
+          <label class="block text-xs text-slate-400 mb-1">EMP ID (7 หลัก)</label>
           <input type="text" id="filterEmpId" oninput="applyFilters()" placeholder="ค้นหา EMP ID..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
         </div>
 
         <!-- WorkOrder Filter -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1">WorkOrder</label>
+          <label class="block text-xs text-slate-400 mb-1">WorkOrder</label>
           <input type="text" id="filterWorkOrder" oninput="applyFilters()" placeholder="เช่น WO-260923..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
         </div>
 
         <!-- Machine Filter -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1">Machine</label>
+          <label class="block text-xs text-slate-400 mb-1">Machine</label>
           <select id="filterMachine" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
             <option value="">ทั้งหมดทุกเครื่อง</option>
           </select>
@@ -563,7 +558,7 @@ select option {
 
         <!-- Status Filter -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1">Status</label>
+          <label class="block text-xs text-slate-400 mb-1">Status</label>
           <select id="filterStatus" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
             <option value="">ทุกสถานะ</option>
             <option value="IN_PROGRESS">IN_PROGRESS (กำลังทำ)</option>
@@ -573,7 +568,7 @@ select option {
 
         <!-- Date Filter -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1">วันที่ (Date)</label>
+          <label class="block text-xs text-slate-400 mb-1">วันที่ (Date)</label>
           <input type="date" id="filterDate" onchange="applyFilters()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
         </div>
       </div>
@@ -584,7 +579,7 @@ select option {
       <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
         <i class="fa-solid fa-list-check text-sky-400"></i> รายการกลุ่มงาน (Production Groups)
       </h2>
-      <span id="groupCountBadge" class="text-[11px] bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">0 กลุ่ม</span>
+      <span id="groupCountBadge" class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">0 กลุ่ม</span>
     </div>
 
     <!-- Group Cards Container -->
@@ -609,7 +604,7 @@ select option {
           </div>
           <div>
             <h3 class="text-lg font-bold text-slate-900">เพิ่มงานใหม่ / เริ่มงานรอบใหม่</h3>
-            <p class="text-[11px] text-slate-500">ระบบจะสร้าง Start Time อัตโนมัติ (GMT+7)</p>
+            <p class="text-xs text-slate-500">ระบบจะสร้าง Start Time อัตโนมัติ (GMT+7)</p>
           </div>
         </div>
         <button onclick="closeAddWorkModal()" class="text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xl p-1 transition">&times;</button>
@@ -619,7 +614,7 @@ select option {
       <form id="addWorkForm" onsubmit="handleStartWorkSubmit(event)" novalidate class="space-y-4">
         <!-- EMP ID Field -->
         <div>
-          <label class="block text-[11px] font-semibold text-slate-700 mb-1">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">
             EMP ID <span class="text-red-400">* (ตัวเลข 6 หรือ 7 หลัก)</span>
           </label>
           <div class="relative">
@@ -635,7 +630,7 @@ select option {
 
         <!-- WorkOrder Field -->
 <div>
-  <label class="block text-[11px] font-semibold text-slate-700 mb-1">
+  <label class="block text-xs font-semibold text-slate-700 mb-1">
     WorkOrder <span class="text-red-400">*</span>
   </label>
 
@@ -667,7 +662,7 @@ select option {
 
         <!-- Machine Category Dropdown -->
         <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
             Machine (เครื่องจักร) <span class="text-red-400">*</span>
           </label>
           <div class="space-y-2">
@@ -689,7 +684,7 @@ select option {
 
         <!-- Submit Button -->
         <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-200">
-          <button type="button" onclick="closeAddWorkModal()" class="px-4 py-2 rounded-xl text-[11px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
+          <button type="button" onclick="closeAddWorkModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
           <button type="submit" id="btnSubmitStartWork" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 text-sm flex items-center gap-2">
             <i class="fa-solid fa-play"></i>
             <span>เริ่มงานทันที (Start Work)</span>
@@ -710,17 +705,17 @@ select option {
         <button onclick="closeGasCodeModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
       </div>
       
-      <p class="text-[11px] text-slate-400 mb-3">
+      <p class="text-xs text-slate-400 mb-3">
         นำ Source Code ด้านล่างนี้ไปใส่ใน Google Apps Script Editor ของชีต <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA</code> ใน Sheet ชื่อ <code class="text-amber-300 font-mono bg-slate-800 px-1 py-0.5 rounded">Work_Log</code> แล้วทำ Web App Deployment ให้สิทธิ์ "Anyone" (ทุกคน)
       </p>
 
       <div class="relative flex-grow bg-slate-950 border border-slate-800 rounded-xl p-3 overflow-hidden">
-        <textarea id="gasCodeTextArea" readonly class="w-full h-72 bg-transparent text-emerald-400 font-mono text-[11px] focus:outline-none resize-none leading-relaxed"></textarea>
+        <textarea id="gasCodeTextArea" readonly class="w-full h-72 bg-transparent text-emerald-400 font-mono text-xs focus:outline-none resize-none leading-relaxed"></textarea>
       </div>
 
       <div class="pt-4 flex items-center justify-between">
-        <span class="text-[11px] text-slate-500">LockService & TimeZone: Asia/Bangkok GMT+7</span>
-        <button onclick="copyGasCode()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-[11px] flex items-center gap-2 shadow-lg">
+        <span class="text-xs text-slate-500">LockService & TimeZone: Asia/Bangkok GMT+7</span>
+        <button onclick="copyGasCode()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg">
           <i class="fa-solid fa-copy"></i>
           <span>คัดลอก Code GAS</span>
         </button>
@@ -1098,7 +1093,7 @@ function responseJSON(obj) {
   const syncStatus = document.getElementById('syncStatus');
 
   syncStatus.className =
-    'flex items-center gap-2 text-[11px] text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
+    'flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
 
   syncStatus.innerHTML =
     '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>' +
@@ -1122,7 +1117,7 @@ const resData = await response.json();
       renderDashboard();
 
       syncStatus.className =
-        'flex items-center gap-2 text-[11px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
+        'flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
 
       syncStatus.innerHTML =
         '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>' +
@@ -1154,7 +1149,7 @@ const resData = await response.json();
     }
 
     syncStatus.className =
-      'flex items-center gap-2 text-[11px] text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
+      'flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
 
     syncStatus.innerHTML =
       '<span class="w-2 h-2 rounded-full bg-rose-400"></span>' +
@@ -1249,7 +1244,7 @@ const resData = await response.json();
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-500 space-y-3">
             <i class="fa-solid fa-folder-open text-4xl text-slate-600"></i>
             <p class="text-slate-300 font-medium">ไม่พบข้อมูลงานตามเงื่อนไขที่เลือก</p>
-            <p class="text-[11px]">กดปุ่ม "+ เพิ่มงาน" ด้านบนเพื่อเริ่มบันทึกการทำงานใหม่</p>
+            <p class="text-xs">กดปุ่ม "+ เพิ่มงาน" ด้านบนเพื่อเริ่มบันทึกการทำงานใหม่</p>
           </div>
         `;
         document.getElementById('groupCountBadge').innerText = '0 กลุ่ม';
@@ -1295,15 +1290,15 @@ const resData = await response.json();
                 
                 <!-- WorkOrder Badge -->
                 <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
-                  <i class="fa-solid fa-file-invoice text-amber-400 text-[11px]"></i>
-                  <span class="text-[11px] text-slate-400">WO:</span>
+                  <i class="fa-solid fa-file-invoice text-amber-400 text-xs"></i>
+                  <span class="text-xs text-slate-400">WO:</span>
                   <span class="font-mono font-bold text-amber-300">${escapeHtml(group.workOrder)}</span>
                 </div>
 
                 <!-- Machine Badge -->
                 <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
-                  <i class="fa-solid fa-industry text-purple-400 text-[11px]"></i>
-                  <span class="text-[11px] text-slate-400">Machine:</span>
+                  <i class="fa-solid fa-industry text-purple-400 text-xs"></i>
+                  <span class="text-xs text-slate-400">Machine:</span>
                   <span class="font-bold text-purple-300">${escapeHtml(group.machine)}</span>
                 </div>
               </div>
@@ -1311,12 +1306,12 @@ const resData = await response.json();
               <!-- Overall Status Badge -->
               <div>
                 ${hasActiveSession 
-                  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                        กำลังดำเนินการ (IN_PROGRESS)
                      </span>`
-                  : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-                       <i class="fa-solid fa-check text-[11px]"></i> เสร็จสิ้นแล้วทุกรอบ
+                  : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                       <i class="fa-solid fa-check text-xs"></i> เสร็จสิ้นแล้วทุกรอบ
                      </span>`
                 }
               </div>
@@ -1354,7 +1349,7 @@ const resData = await response.json();
 
   </tr>
 </thead>
-                <tbody class="divide-y divide-slate-800/40 text-[11px]">
+                <tbody class="divide-y divide-slate-800/40 text-xs">
                   ${group.sessions.map((sess, idx) => renderSessionRow(sess, idx + 1)).join('')}
                 </tbody>
               </table>
@@ -1424,7 +1419,7 @@ function renderSessionRow(sess, roundNum) {
       <!-- ACTION -->
       <td class="py-3 px-3 text-center align-middle whitespace-nowrap">
         ${isCompleted
-          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg text-[11px] border border-sky-500/20">
+          ? `<span class="inline-flex items-center justify-center gap-1 text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg text-xs border border-sky-500/20">
                <i class="fa-solid fa-circle-check"></i>
                COMPLETED
              </span>`
@@ -1433,7 +1428,7 @@ function renderSessionRow(sess, roundNum) {
                class="bg-gradient-to-r from-emerald-500 to-teal-600
                       hover:from-emerald-600 hover:to-teal-700
                       text-white font-semibold px-3 py-1.5 rounded-xl
-                      shadow-lg shadow-emerald-900/30 text-[11px]
+                      shadow-lg shadow-emerald-900/30 text-xs
                       inline-flex items-center justify-center gap-1.5
                       transition active:scale-95">
                <i class="fa-solid fa-flag-checkered"></i>
@@ -1642,7 +1637,7 @@ if (!/^\d{6,7}$/.test(empId)) {
           title: 'ไม่สามารถเริ่มงานใหม่ได้',
           html: `
             <p class="text-slate-300 mb-3">รหัสพนักงานนี้ <strong>(${empId})</strong> มีงานที่กำลังดำเนินการอยู่ กรุณาปิดงานปัจจุบันก่อน จึงจะสามารถเริ่มงานรอบถัดไปได้</p>
-            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-left text-[11px] font-mono space-y-1 text-amber-300">
+            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-left text-xs font-mono space-y-1 text-amber-300">
               <div><i class="fa-solid fa-file-invoice"></i> WO: <strong>${escapeHtml(activeJob.workOrder)}</strong></div>
               <div><i class="fa-solid fa-industry"></i> Machine: <strong>${escapeHtml(activeJob.machine)}</strong></div>
               <div><i class="fa-regular fa-clock"></i> เริ่มงานเมื่อ: <strong>${formatAppDateTime(activeJob.startTime)}</strong></div>
@@ -1705,7 +1700,7 @@ renderDashboard();
             html: `
               <p class="text-slate-300 mb-3">${escapeHtml(resData.message)}</p>
               ${job.workOrder ? `
-                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-left text-[11px] font-mono space-y-1 text-amber-300">
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-left text-xs font-mono space-y-1 text-amber-300">
                   <div><i class="fa-solid fa-file-invoice"></i> WO: <strong>${escapeHtml(job.workOrder)}</strong></div>
                   <div><i class="fa-solid fa-industry"></i> Machine: <strong>${escapeHtml(job.machine)}</strong></div>
                   <div><i class="fa-regular fa-clock"></i> เริ่มงานเมื่อ: <strong>${formatAppDateTime(job.startTime)}</strong></div>

@@ -70,20 +70,20 @@ colors: {
   }
     
     /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #1e293b;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
-    }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #e1eff6;
+}
+::-webkit-scrollbar-thumb {
+  background: #a9c9d9;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7fb4c9;
+}
     /* Pulse glow effect for IN_PROGRESS */
     .glow-progress {
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
@@ -138,11 +138,6 @@ main .bg-slate-900\/90 {
     0 8px 25px rgba(71, 85, 105, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(8px);
-}
-
-/* Stats labels */
-main .text-slate-400 {
-  color: #64748b !important;
 }
 
 /* Filters */
@@ -217,19 +212,6 @@ main h2 {
 /* Table hover */
 #dashboardCardsContainer tr:hover {
   background: rgba(186, 230, 253, 0.18) !important;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar-track {
-  background: #e1eff6;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #a9c9d9;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #7fb4c9;
 }
 
     /* =========================================
@@ -538,7 +520,7 @@ select option {
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <!-- EMP ID Search -->
         <div>
-          <label class="block text-[13px] text-slate-400 mb-1">EMP ID (7 หลัก)</label>
+          <label class="block text-[13px] text-slate-400 mb-1">EMP ID (6 หรือ 7 หลัก)</label>
           <input type="text" id="filterEmpId" oninput="applyFilters()" placeholder="ค้นหา EMP ID..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
         </div>
 

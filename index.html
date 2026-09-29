@@ -1304,17 +1304,18 @@ const resData = await response.json();
               </div>
 
               <!-- Overall Status Badge -->
-              <div>
-                ${hasActiveSession 
-                  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[14px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                       กำลังดำเนินการ (IN_PROGRESS)
-                     </span>`
-                  : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[14px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-                       <i class="fa-solid fa-check text-xs"></i> เสร็จสิ้นแล้วทุกรอบ
-                     </span>`
-                }
-              </div>
+<div>
+  ${hasActiveSession 
+    ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[14px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+         กำลังดำเนินการ
+       </span>`
+    : `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[14px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+         <i class="fa-solid fa-circle-check text-blue-700"></i>
+         ดำเนินการครบแล้ว
+       </span>`
+  }
+</div>
             </div>
 
             <!-- Sessions List (Rounds Table) -->

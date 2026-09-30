@@ -775,31 +775,62 @@ function doGet(e) {
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
+  let lockAcquired = false;
+
   try {
-    if (!lock.waitLock(10000)) {
-      return responseJSON({ status: 'error', message: 'ระบบกำลังประมวลผลคำสั่งอื่นอยู่ กรุณาลองใหม่อีกครั้ง' });
-    }
+
+    // รอ Lock สูงสุด 30 วินาที
+    lock.waitLock(30000);
+    lockAcquired = true;
 
     let contents = {};
+
     if (e && e.postData && e.postData.contents) {
-      contents = JSON.parse(e.postData.contents);
+      try {
+        contents = JSON.parse(e.postData.contents);
+      } catch (parseErr) {
+        return responseJSON({
+          status: 'error',
+          message: 'ข้อมูลที่ส่งมายัง Backend ไม่ถูกต้อง'
+        });
+      }
     } else if (e && e.parameter) {
       contents = e.parameter;
     }
 
-    const action = contents.action;
+    const action = String(contents.action || '').trim();
+
     if (action === 'startWork') {
       return handleStartWork(contents);
-    } else if (action === 'completeWork') {
+    }
+
+    if (action === 'completeWork') {
       return handleCompleteWork(contents);
     }
 
-    return responseJSON({ status: 'error', message: 'Invalid action requested' });
+    return responseJSON({
+      status: 'error',
+      message: 'Invalid action requested: ' + action
+    });
 
   } catch (err) {
-    return responseJSON({ status: 'error', message: err.toString() });
+
+    Logger.log('===== DO POST ERROR =====');
+    Logger.log(err);
+    Logger.log(err.stack || '');
+
+    return responseJSON({
+      status: 'error',
+      message: 'Backend Error: ' + err.message
+    });
+
   } finally {
-    lock.releaseLock();
+
+    // ปลด Lock เฉพาะกรณีที่ได้ Lock จริง
+    if (lockAcquired) {
+      lock.releaseLock();
+    }
+
   }
 }
 
@@ -832,8 +863,26 @@ function handleStartWork(params) {
   const machine = String(params.machine || '').trim();
 
   if (!empId || !/^\d{6,7}$/.test(empId)) {
-  return responseJSON({ status: 'error', message: 'EMP ID ต้องเป็นตัวเลข 6-7 หลักเท่านั้น' });
-}
+    return responseJSON({
+      status: 'error',
+      message: 'EMP ID ต้องเป็นตัวเลข 6-7 หลักเท่านั้น'
+    });
+  }
+
+  if (!/^WO-\d{8}$/.test(workOrder)) {
+    return responseJSON({
+      status: 'error',
+      message: 'WorkOrder ต้องอยู่ในรูปแบบ WO-XXXXXXXX'
+    });
+  }
+
+  if (!machine) {
+    return responseJSON({
+      status: 'error',
+      message: 'กรุณาระบุ Machine'
+    });
+  }
+
   const sheet = getSheet();
 
 const lastRow = sheet.getLastRow();

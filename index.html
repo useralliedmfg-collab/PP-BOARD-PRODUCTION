@@ -774,17 +774,11 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  const lock = LockService.getScriptLock();
-  let lockAcquired = false;
+  let contents = {};
 
   try {
 
-    // รอ Lock สูงสุด 30 วินาที
-    lock.waitLock(30000);
-    lockAcquired = true;
-
-    let contents = {};
-
+    // อ่านข้อมูล Request ก่อน
     if (e && e.postData && e.postData.contents) {
       try {
         contents = JSON.parse(e.postData.contents);
@@ -800,18 +794,37 @@ function doPost(e) {
 
     const action = String(contents.action || '').trim();
 
-    if (action === 'startWork') {
-      return handleStartWork(contents);
+    // ตรวจสอบ Action
+    if (action !== 'startWork' && action !== 'completeWork') {
+      return responseJSON({
+        status: 'error',
+        message: 'Invalid action requested: ' + action
+      });
     }
 
-    if (action === 'completeWork') {
-      return handleCompleteWork(contents);
+    // Lock เฉพาะช่วงประมวลผล
+    const lock = LockService.getScriptLock();
+
+    if (!lock.tryLock(3000)) {
+      return responseJSON({
+        status: 'error',
+        message: 'ระบบกำลังบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง'
+      });
     }
 
-    return responseJSON({
-      status: 'error',
-      message: 'Invalid action requested: ' + action
-    });
+    try {
+
+      if (action === 'startWork') {
+        return handleStartWork(contents);
+      }
+
+      if (action === 'completeWork') {
+        return handleCompleteWork(contents);
+      }
+
+    } finally {
+      lock.releaseLock();
+    }
 
   } catch (err) {
 
@@ -823,14 +836,6 @@ function doPost(e) {
       status: 'error',
       message: 'Backend Error: ' + err.message
     });
-
-  } finally {
-
-    // ปลด Lock เฉพาะกรณีที่ได้ Lock จริง
-    if (lockAcquired) {
-      lock.releaseLock();
-    }
-
   }
 }
 

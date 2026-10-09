@@ -772,6 +772,33 @@ select option {
 const SHEET_ID = '1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA';
 const TAB_NAME = 'Work_Log';
 
+const EMPLOYEE_SHEET_NAME = 'Employee_Master';
+
+function getEmployeeName(empId) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(EMPLOYEE_SHEET_NAME);
+
+  if (!sheet) {
+    return '';
+  }
+
+  // ใช้ DisplayValues เพื่อไม่ให้เลข 0 ด้านหน้าหาย
+  const data = sheet.getDataRange().getDisplayValues();
+
+  const targetEmpId = String(empId).trim();
+
+  for (let i = 1; i < data.length; i++) {
+    const id = String(data[i][0]).trim();
+    const name = String(data[i][1]).trim();
+
+    if (id === targetEmpId) {
+      return name;
+    }
+  }
+
+  return '';
+}
+
 function getSheet() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   let sheet = ss.getSheetByName(TAB_NAME);
@@ -868,6 +895,7 @@ function handleGetWorkLogs() {
   const result = rows.map(row => ({
     id: String(row[0]),
     empId: String(row[1]),
+    empName: getEmployeeName(String(row[1])),
     workOrder: String(row[2]),
     machine: String(row[3]),
     startTime: row[4] ? String(row[4]) : '',
@@ -884,6 +912,9 @@ function handleStartWork(params) {
   const empId = String(params.empId || '').trim();
   const workOrder = String(params.workOrder || '').trim();
   const machine = String(params.machine || '').trim();
+
+    // ค้นหาชื่อพนักงานจาก Employee_Master
+  const empName = getEmployeeName(empId);
 
   if (!empId || !/^\d{6,7}$/.test(empId)) {
     return responseJSON({
@@ -974,6 +1005,7 @@ if (
     data: {
       id: newId,
       empId: empId,
+      empName: empName,
       workOrder: workOrder,
       machine: machine,
       startTime: startTimeStr,
@@ -1459,6 +1491,10 @@ function renderSessionRow(sess, roundNum) {
 
 <span class="text-[14px] text-sky-400 font-mono whitespace-nowrap">
   EMP ID: ${escapeHtml(sess.empId)}
+</span>
+<span class="text-[13px] text-slate-600 font-medium whitespace-nowrap">
+  <i class="fa-solid fa-user mr-1"></i>
+  ${escapeHtml(sess.empName || 'ไม่พบชื่อพนักงาน')}
 </span>
         </div>
       </td>

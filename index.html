@@ -456,11 +456,30 @@ select option {
             <i id="refreshIcon" class="fa-solid fa-rotate"></i>
           </button>
 
-          <button onclick="openGasCodeModal()" title="ดู Code Google Apps Script" class="bg-sky-50 hover:bg-sky-100 text-amber-600 p-2.5 rounded-xl border border-sky-200 transition flex items-center gap-1.5 text-xs font-medium">
-            <i class="fa-solid fa-code"></i>
-            <span class="hidden sm:inline">GAS Backend</span>
-          </button>
-        </div>
+          <!-- Home + GAS Backend -->
+<div class="flex flex-col gap-3">
+
+  <!-- HOME -->
+  <button
+    onclick="window.location.href='https://script.google.com/macros/s/AKfycbwosmRcLiNfMqAM3XJ-4JdUVkIqwyUhOKqKE3yh8eBue41krkJCUTjYO6gulpzg5E9dRw/exec'"
+    title="กลับหน้า Home"
+    class="bg-white hover:bg-sky-50 text-sky-700 px-3 py-1.5 rounded-lg border border-sky-200 transition flex items-center justify-center gap-2 text-xs font-semibold shadow-sm"
+  >
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+  </button>
+
+  <!-- GAS BACKEND -->
+  <button
+    onclick="openGasCodeModal()"
+    title="ดู Code Google Apps Script"
+    class="bg-sky-50 hover:bg-sky-100 text-slate-700 px-3 py-1.5 rounded-lg border border-sky-200 transition flex items-center justify-center gap-4 text-xs font-medium"
+  >
+    <i class="fa-solid fa-code"></i>
+    <span>GAS Backend</span>
+  </button>
+
+</div>
       </div>
     </div>
   </header>

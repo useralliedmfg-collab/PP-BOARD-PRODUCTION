@@ -774,42 +774,42 @@ const TAB_NAME = 'Work_Log';
 
 const EMPLOYEE_SHEET_NAME = 'Employee_Master';
 
+
 function getEmployeeName(empId) {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   const sheet = ss.getSheetByName(EMPLOYEE_SHEET_NAME);
 
   if (!sheet) {
-    return '';
+    throw new Error('ไม่พบชีต: ' + EMPLOYEE_SHEET_NAME);
   }
 
-  // ใช้ DisplayValues เพื่อไม่ให้เลข 0 ด้านหน้าหาย
   const data = sheet.getDataRange().getDisplayValues();
 
-  const targetEmpId = String(empId).trim();
+  const normalize = value =>
+    String(value ?? '').trim().replace(/\s+/g, '');
+
+  const targetEmpId = normalize(empId);
+
+  Logger.log('EMP_ID ที่รับมา: [' + targetEmpId + ']');
+  Logger.log('จำนวนแถวข้อมูล: ' + data.length);
 
   for (let i = 1; i < data.length; i++) {
-    const id = String(data[i][0]).trim();
-    const name = String(data[i][1]).trim();
+    const id = normalize(data[i][0]);
+    const name = String(data[i][1] ?? '').trim();
+
+    Logger.log(
+      'แถว ' + (i + 1) + ' | EMP_ID=[' + id + '] | EMP_NAME=[' + name + ']'
+    );
 
     if (id === targetEmpId) {
+      Logger.log('พบชื่อพนักงาน: ' + name);
       return name;
     }
   }
 
+  Logger.log('ไม่พบ EMP_ID: [' + targetEmpId + ']');
   return '';
 }
-
-function getSheet() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  let sheet = ss.getSheetByName(TAB_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(TAB_NAME);
-    sheet.appendRow(['ID', 'EMP_ID', 'WorkOrder', 'Machine', 'StartTime', 'EndTime', 'Quantity', 'Duration', 'Status']);
-    sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#f3f4f6');
-  }
-  return sheet;
-}
-
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'getWorkLogs';
   if (action === 'getWorkLogs') {

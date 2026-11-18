@@ -591,34 +591,12 @@ select option {
     </div>
   </div>
 
-  <div class="flex items-center gap-2">
-
-  <!-- HISTORY BUTTON -->
-  <button
-    id="historyToggleBtn"
-    onclick="loadCompletedHistory(1)"
-    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full
-           bg-white border border-sky-200
-           text-sm font-semibold text-sky-700
-           hover:bg-sky-50 transition whitespace-nowrap">
-
-    <i class="fa-solid fa-clock-rotate-left"></i>
-
-    <span>ประวัติงาน</span>
-
-  </button>
-
-
-  <!-- GROUP COUNT -->
   <span id="groupCountBadge"
         class="inline-flex items-center px-3 py-1.5 rounded-full
                bg-sky-50 border border-sky-200
                text-sm font-semibold text-sky-700 whitespace-nowrap">
-
-    0 กลุ่ม
-
+    0 งาน
   </span>
-
 </div>
 
     <!-- Group Cards Container -->
@@ -780,14 +758,7 @@ select option {
     const GOOGLE_SHEET_ID = "1qt_0B66GIYzDEKhkn8zXsy-48WyerVjVyc4JYEMI_hA";
 
     let rawWorkLogs = [];
-let completedWorkLogs = [];
-
-let currentHistoryPage = 1;
-const HISTORY_PAGE_SIZE = 50;
-
-let historyMode = false;
-
-let timerInterval = null;
+    let timerInterval = null;
 
     /* --------------------------------------------------------
        GOOGLE APPS SCRIPT BACKEND CODE STRING (Embedded)
@@ -1229,277 +1200,78 @@ function responseJSON(obj) {
     }
 
     async function fetchWorkLogs(retryCount = 0) {
-
-  const refreshIcon =
-    document.getElementById('refreshIcon');
-
+  const refreshIcon = document.getElementById('refreshIcon');
   refreshIcon.classList.add('fa-spin');
 
-
-  const syncStatus =
-    document.getElementById('syncStatus');
-
+  const syncStatus = document.getElementById('syncStatus');
 
   syncStatus.className =
     'flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
 
-
   syncStatus.innerHTML =
     '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>' +
-    `<span>${
-      retryCount > 0
-        ? `กำลังเชื่อมต่อใหม่ (${retryCount}/3)...`
-        : 'กำลังดึงข้อมูลงานที่กำลังดำเนินการ...'
-    }</span>`;
-
+    `<span>${retryCount > 0 ? `กำลังเชื่อมต่อใหม่ (${retryCount}/3)...` : 'กำลังดึงข้อมูล...'}</span>`;
 
   try {
-
     const response = await fetch(
-      `${GAS_ENDPOINT}?action=getInProgress&t=${Date.now()}`
-    );
+  `${GAS_ENDPOINT}?action=getWorkLogs&t=${Date.now()}`
+);
 
+if (!response.ok) {
+  throw new Error(`Backend HTTP Error: ${response.status}`);
+}
 
-    if (!response.ok) {
-
-      throw new Error(
-        `Backend HTTP Error: ${response.status}`
-      );
-
-    }
-
-
-    const resData =
-      await response.json();
-
+const resData = await response.json();
 
     if (resData.status === 'success') {
-
-      // เก็บเฉพาะ IN_PROGRESS
-      rawWorkLogs =
-        resData.data || [];
-
-
-      completedWorkLogs = [];
-
-      historyMode = false;
-
-      currentHistoryPage = 1;
-
+      rawWorkLogs = resData.data || [];
 
       populateMachineFilterOptions();
-
       renderDashboard();
-
 
       syncStatus.className =
         'flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
-
 
       syncStatus.innerHTML =
         '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>' +
         '<span>เชื่อมต่อสำเร็จ</span>';
 
-
       return;
-
     }
-
 
     showErrorToast(
       'ไม่สามารถดึงข้อมูลได้: ' +
-      (
-        resData.message ||
-        'ไม่ทราบสาเหตุ'
-      )
+      (resData.message || 'ไม่ทราบสาเหตุ')
     );
 
-
   } catch (err) {
-
     console.error(
       `Fetch error (attempt ${retryCount + 1}/3):`,
       err
     );
 
-
+    // Retry สูงสุด 3 ครั้ง
     if (retryCount < 2) {
+      const retryDelay = retryCount === 0 ? 1000 : 2000;
 
-      const retryDelay =
-        retryCount === 0
-          ? 1000
-          : 2000;
-
-
-      await new Promise(
-        resolve =>
-          setTimeout(
-            resolve,
-            retryDelay
-          )
+      await new Promise(resolve =>
+        setTimeout(resolve, retryDelay)
       );
 
-
-      return fetchWorkLogs(
-        retryCount + 1
-      );
-
+      return fetchWorkLogs(retryCount + 1);
     }
-
 
     syncStatus.className =
       'flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20';
-
 
     syncStatus.innerHTML =
       '<span class="w-2 h-2 rounded-full bg-rose-400"></span>' +
       '<span>การเชื่อมต่อขัดข้อง</span>';
 
-
   } finally {
-
     refreshIcon.classList.remove('fa-spin');
   }
 }
-
-    async function loadCompletedHistory(page = 1) {
-
-  historyMode = true;
-
-  currentHistoryPage = page;
-      const historyBtn =
-  document.getElementById('historyToggleBtn');
-
-if (historyBtn) {
-
-  historyBtn.innerHTML = `
-    <i class="fa-solid fa-spinner fa-spin"></i>
-    <span>กำลังโหลดประวัติ...</span>
-  `;
-
-}
-
-  const syncStatus =
-    document.getElementById('syncStatus');
-
-
-  syncStatus.className =
-    'flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20';
-
-
-  syncStatus.innerHTML =
-    '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>' +
-    '<span>กำลังโหลดประวัติงาน...</span>';
-
-
-  try {
-
-    const empId =
-      document.getElementById('filterEmpId')?.value || '';
-
-    const workOrder =
-      document.getElementById('filterWorkOrder')?.value || '';
-
-    const machine =
-      document.getElementById('filterMachine')?.value || '';
-
-    const date =
-      document.getElementById('filterDate')?.value || '';
-
-
-    const params = new URLSearchParams({
-
-      action: 'getCompleted',
-
-      page: page,
-
-      pageSize:
-        HISTORY_PAGE_SIZE,
-
-      empId:
-        empId.trim(),
-
-      workOrder:
-        workOrder.trim(),
-
-      machine:
-        machine.trim(),
-
-      date:
-        date.trim(),
-
-      t:
-        Date.now()
-
-    });
-
-
-    const response =
-      await fetch(
-        `${GAS_ENDPOINT}?${params.toString()}`
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        `Backend HTTP Error: ${response.status}`
-      );
-
-    }
-
-
-    const resData =
-      await response.json();
-
-
-    if (
-      resData.status !== 'success'
-    ) {
-
-      throw new Error(
-        resData.message ||
-        'ไม่สามารถโหลดประวัติงานได้'
-      );
-
-    }
-
-
-    completedWorkLogs =
-      resData.data || [];
-
-
-    renderHistoryDashboard(
-      completedWorkLogs,
-      resData.pagination
-    );
-
-
-    syncStatus.className =
-      'flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20';
-
-
-    syncStatus.innerHTML =
-      '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>' +
-      '<span>โหลดประวัติงานสำเร็จ</span>';
-
-  } catch (err) {
-
-    console.error(
-      'Load completed history error:',
-      err
-    );
-
-
-    showErrorToast(
-      err.message ||
-      'ไม่สามารถโหลดประวัติงานได้'
-    );
-
-  }
-
-}
-    
     function populateMachineFilterOptions() {
       const select = document.getElementById('filterMachine');
       if (!select) return;
@@ -1546,166 +1318,29 @@ if (historyBtn) {
     }
 
     function applyFilters() {
+      renderDashboard();
+    }
 
-  /*
-   * ถ้าอยู่โหมดประวัติงาน
-   * ให้โหลดข้อมูลจาก Backend ใหม่
-   * เพราะ Filter ถูกประมวลผลที่ GAS
-   */
-  if (historyMode) {
+    function resetFilters() {
+      document.getElementById('filterEmpId').value = '';
+      document.getElementById('filterWorkOrder').value = '';
+      document.getElementById('filterMachine').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterDate').value = '';
+      renderDashboard();
+    }
 
-    clearTimeout(window.historyFilterTimer);
+    function renderDashboard() {
+      const container = document.getElementById('dashboardCardsContainer');
+      
+      // Apply Client Filters
+      const filterEmp = document.getElementById('filterEmpId').value.trim().toLowerCase();
+      const filterWo = document.getElementById('filterWorkOrder').value.trim().toLowerCase();
+      const filterMac = document.getElementById('filterMachine').value.trim();
+      const filterStat = document.getElementById('filterStatus').value;
+      const filterDt = document.getElementById('filterDate').value;
 
-    window.historyFilterTimer = setTimeout(() => {
-
-      loadCompletedHistory(1);
-
-    }, 350);
-
-    return;
-  }
-
-
-  /*
-   * โหมดงานกำลังดำเนินการ
-   * ใช้ข้อมูลที่โหลดมาแล้วใน Browser
-   */
-  renderDashboard();
-
-}
-
-
-function resetFilters() {
-
-  document.getElementById('filterEmpId').value = '';
-  document.getElementById('filterWorkOrder').value = '';
-  document.getElementById('filterMachine').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterDate').value = '';
-
-
-  /*
-   * ถ้าอยู่ประวัติ
-   * โหลดหน้า 1 ใหม่
-   */
-  if (historyMode) {
-
-    loadCompletedHistory(1);
-
-    return;
-
-  }
-
-
-  renderDashboard();
-
-}
-
-    function renderDashboard(sourceLogs = null) {
-
-  const container =
-    document.getElementById('dashboardCardsContainer');
-
-
-  /*
-   * ถ้ามี sourceLogs ส่งมา
-   * ใช้ข้อมูลนั้นโดยตรง
-   *
-   * ถ้าไม่มี
-   * ใช้ rawWorkLogs ซึ่งเป็น IN_PROGRESS
-   */
-  const sourceData =
-    Array.isArray(sourceLogs)
-      ? sourceLogs
-      : rawWorkLogs;
-
-
-  // Apply Client Filters
-  const filterEmp =
-    document.getElementById('filterEmpId')
-      .value
-      .trim()
-      .toLowerCase();
-
-
-  const filterWo =
-    document.getElementById('filterWorkOrder')
-      .value
-      .trim()
-      .toLowerCase();
-
-
-  const filterMac =
-    document.getElementById('filterMachine')
-      .value
-      .trim();
-
-
-  const filterStat =
-    document.getElementById('filterStatus')
-      .value;
-
-
-  const filterDt =
-    document.getElementById('filterDate')
-      .value;
-
-
-  let filteredLogs =
-    sourceData.filter(item => {
-
-      if (
-        filterEmp &&
-        !String(item.empId || '')
-          .toLowerCase()
-          .includes(filterEmp)
-      ) {
-        return false;
-      }
-
-
-      if (
-        filterWo &&
-        !String(item.workOrder || '')
-          .toLowerCase()
-          .includes(filterWo)
-      ) {
-        return false;
-      }
-
-
-      if (
-        filterMac &&
-        item.machine !== filterMac
-      ) {
-        return false;
-      }
-
-
-      if (
-        filterStat &&
-        item.status !== filterStat
-      ) {
-        return false;
-      }
-
-
-      if (
-        filterDt &&
-        !String(item.startTime || '')
-          .startsWith(filterDt)
-      ) {
-        return false;
-      }
-
-
-      return true;
-
-    });
-
-
-  // Update Top Statistics
-  updateTopStats(sourceData);
+      let filteredLogs = rawWorkLogs.filter(item => {
         if (filterEmp && !item.empId.toLowerCase().includes(filterEmp)) return false;
         if (filterWo && !item.workOrder.toLowerCase().includes(filterWo)) return false;
         if (filterMac && item.machine !== filterMac) return false;
@@ -1879,202 +1514,6 @@ groupKeys.forEach((key) => {
 
       container.innerHTML = html;
     }
-
-    function renderHistoryDashboard(logs, pagination) {
-
-  /*
-   * ใช้ Renderer เดิมของ Dashboard
-   * แต่ส่งเฉพาะข้อมูล COMPLETED
-   */
-  renderDashboard(logs);
-
-
-  /*
-   * สร้าง Pagination ด้านล่าง
-   */
-  const container =
-    document.getElementById(
-      'dashboardCardsContainer'
-    );
-
-
-  if (!pagination) {
-    return;
-  }
-
-
-  const page =
-    Number(pagination.page || 1);
-
-
-  const totalPages =
-    Number(pagination.totalPages || 0);
-
-
-  const totalItems =
-    Number(pagination.totalItems || 0);
-
-
-  if (totalPages <= 1) {
-
-    return;
-
-  }
-
-
-  const paginationHtml = `
-
-    <div class="flex flex-col sm:flex-row
-                items-center justify-between
-                gap-3
-                bg-white
-                border border-sky-200
-                rounded-2xl
-                px-4 py-3
-                mt-4">
-
-      <!-- INFO -->
-      <div class="text-xs text-slate-500">
-
-        แสดงประวัติงาน
-        <span class="font-semibold text-slate-700">
-          ${(page - 1) * HISTORY_PAGE_SIZE + 1}
-        </span>
-
-        -
-
-        <span class="font-semibold text-slate-700">
-          ${Math.min(
-            page * HISTORY_PAGE_SIZE,
-            totalItems
-          )}
-        </span>
-
-        จากทั้งหมด
-
-        <span class="font-semibold text-slate-700">
-          ${totalItems}
-        </span>
-
-        รายการ
-
-      </div>
-
-
-      <!-- PAGINATION -->
-      <div class="flex items-center gap-2">
-
-        <button
-          onclick="loadCompletedHistory(${page - 1})"
-          ${!pagination.hasPreviousPage ? 'disabled' : ''}
-          class="
-            px-3 py-1.5 rounded-lg
-            border border-sky-200
-            bg-white
-            text-sky-700
-            text-xs font-semibold
-            hover:bg-sky-50
-            disabled:opacity-40
-            disabled:cursor-not-allowed
-          ">
-
-          <i class="fa-solid fa-chevron-left"></i>
-
-        </button>
-
-
-        <span class="
-          px-3 py-1.5
-          rounded-lg
-          bg-sky-50
-          border border-sky-200
-          text-xs font-semibold
-          text-sky-700
-        ">
-
-          หน้า ${page} / ${totalPages}
-
-        </span>
-
-
-        <button
-          onclick="loadCompletedHistory(${page + 1})"
-          ${!pagination.hasNextPage ? 'disabled' : ''}
-          class="
-            px-3 py-1.5 rounded-lg
-            border border-sky-200
-            bg-white
-            text-sky-700
-            text-xs font-semibold
-            hover:bg-sky-50
-            disabled:opacity-40
-            disabled:cursor-not-allowed
-          ">
-
-          <i class="fa-solid fa-chevron-right"></i>
-
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  container.insertAdjacentHTML(
-    'beforeend',
-    paginationHtml
-  );
-
-
-  /*
-   * เปลี่ยนปุ่มเป็น "กลับงานปัจจุบัน"
-   */
-  const historyBtn =
-    document.getElementById(
-      'historyToggleBtn'
-    );
-
-
-  if (historyBtn) {
-
-    historyBtn.innerHTML = `
-
-      <i class="fa-solid fa-arrow-left"></i>
-
-      <span>กลับงานปัจจุบัน</span>
-
-    `;
-
-
-    historyBtn.onclick =
-      function () {
-
-        historyMode = false;
-
-        currentHistoryPage = 1;
-
-        completedWorkLogs = [];
-
-        populateMachineFilterOptions();
-
-        renderDashboard();
-
-      };
-
-  }
-
-
-  /*
-   * เปลี่ยนหัวข้อจำนวนรายการ
-   */
-  document.getElementById(
-    'groupCountBadge'
-  ).innerText =
-    `${totalItems} รายการ`;
-
-}
     
 function renderSessionRow(sess, roundNum) {
   const isCompleted = sess.status === 'COMPLETED';

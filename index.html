@@ -1380,13 +1380,52 @@ const resData = await response.json();
         groupsMap[key].sessions.push(log);
       });
 
-      const groupKeys = Object.keys(groupsMap);
-      document.getElementById('groupCountBadge').innerText = `${groupKeys.length} กลุ่ม`;
+      
+// ==========================================
+// SORT GROUPS
+// IN_PROGRESS แสดงก่อน COMPLETED
+// และเรียงเวลาเริ่มงานล่าสุดก่อน
+// ==========================================
 
-      let html = '';
+const groupKeys = Object.keys(groupsMap);
 
-      groupKeys.forEach((key) => {
-        const group = groupsMap[key];
+groupKeys.sort((keyA, keyB) => {
+    const groupA = groupsMap[keyA];
+    const groupB = groupsMap[keyB];
+
+    const activeA = groupA.sessions.some(
+        s => s.status === 'IN_PROGRESS'
+    );
+
+    const activeB = groupB.sessions.some(
+        s => s.status === 'IN_PROGRESS'
+    );
+
+    // 1. งานกำลังดำเนินการอยู่ด้านบน
+    if (activeA !== activeB) {
+        return activeA ? -1 : 1;
+    }
+
+    // 2. เรียงตามเวลาเริ่มงานล่าสุดก่อน
+    const latestA = Math.max(
+        ...groupA.sessions.map(s => new Date(s.startTime.replace(/-/g, '/')).getTime())
+    );
+
+    const latestB = Math.max(
+        ...groupB.sessions.map(s => new Date(s.startTime.replace(/-/g, '/')).getTime())
+    );
+
+    return latestB - latestA;
+});
+
+document.getElementById('groupCountBadge').innerText =
+    `${groupKeys.length} กลุ่ม`;
+
+let html = '';
+
+groupKeys.forEach((key) => {
+    const group = groupsMap[key];
+
         
         // Sort sessions chronologically (Oldest round to Newest)
         group.sessions.sort((a, b) => new Date(a.startTime.replace(/-/g, '/')) - new Date(b.startTime.replace(/-/g, '/')));
